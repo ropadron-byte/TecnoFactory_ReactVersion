@@ -1,11 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { fireEvent, screen, within } from '@testing-library/react'
-import { CLIENTE, ENTREGA_RETIRO, conSesion, escribir, hacerClick, renderEn } from './helpers.jsx'
+import { render, screen } from '@testing-library/react'
+import Ofertas from '../pages/Ofertas.jsx'
+import { vista } from './helpers.jsx'
 
-describe('Ofertas', () => {
-  it('muestra solo productos con descuento', async () => {
-    renderEn('/ofertas')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Productos en oferta' })).toBeInTheDocument()
-    expect(screen.getAllByText(/^-\d+%$/).length).toBeGreaterThan(0)
+describe('Vista Ofertas', () => {
+  it('muestra solo los productos con descuento, del mayor al menor', () => {
+    render(vista(Ofertas, { ruta: '/ofertas' }))
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Productos en oferta' })).toBeInTheDocument()
+    expect(screen.getAllByRole('article')).toHaveLength(7)
+    expect(screen.queryByText('iPhone 5s')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'Vivo X21',
+      'Realme C35',
+      'iPhone X',
+      'New DELL XPS 13 9300 Laptop',
+      'Asus Zenbook Pro Dual Screen Laptop',
+      'iPhone 6',
+      'Vivo S1',
+    ])
+    expect(screen.getByText('-25%')).toBeInTheDocument()
+    expect(screen.getByText('-20%')).toBeInTheDocument()
   })
 })

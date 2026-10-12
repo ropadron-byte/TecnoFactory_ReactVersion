@@ -1,28 +1,39 @@
 import { describe, expect, it } from 'vitest'
-import { fireEvent, screen, within } from '@testing-library/react'
-import { CLIENTE, ENTREGA_RETIRO, conSesion, escribir, hacerClick, renderEn } from './helpers.jsx'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import Checkout from '../pages/Checkout.jsx'
+import { vista } from './helpers.jsx'
 import { addToCart, getCart } from '../services/carritoService'
 import { obtenerOrdenes } from '../services/ordenesService'
 import { obtenerProductoPorCodigo } from '../services/productosService'
-import { guardarUsuario, iniciarSesion } from '../services/usuariosService'
 
-describe('Checkout', () => {
-  it('con sesión iniciada autocompleta los datos y registra la compra a nombre del usuario', async () => {
-    guardarUsuario({ run: '190110222', nombre: 'Luisa', apellidos: 'Soto', correo: 'luisa@gmail.com', contrasena: 'abcd', tipo: 'Cliente', region: 'Región Metropolitana', comuna: 'Santiago', direccion: 'Los Olmos 45' })
-    const usuario = iniciarSesion('luisa@gmail.com', 'abcd')
+describe('Vista Checkout', () => {
+  it('valida el formulario, alterna la entrega y registra la compra pagada', async () => {
+    const user = userEvent.setup()
     addToCart('TF-NB-004', 2)
-    renderEn('/checkout')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Finalizar compra' })).toBeInTheDocument()
+    render(vista(Checkout, { ruta: '/checkout' }))
 
-    // Los datos de la cuenta aparecen solos, sin escribir nada
-    expect(screen.getByLabelText('Nombre *')).toHaveValue('Luisa')
-    expect(screen.getByLabelText('Apellidos *')).toHaveValue('Soto')
-    expect(screen.getByLabelText('Correo *')).toHaveValue('luisa@gmail.com')
-    expect(screen.getByLabelText('Calle *')).toHaveValue('Los Olmos 45')
+    expect(screen.getByRole('heading', { level: 1, name: 'Finalizar compra' })).toBeInTheDocument()
+    expect(screen.getByText('Total a pagar: $2.089.980')).toBeInTheDocument()
 
-    hacerClick(/Pagar ahora/)
-    expect(await screen.findByText(/Se ha realizado la compra/)).toBeInTheDocument()
-    expect(obtenerOrdenes()[0]).toMatchObject({ estado: 'Pagada', usuarioId: usuario.id, cliente: { nombre: 'Luisa', correo: 'luisa@gmail.com' } })
+    await user.click(screen.getByRole('button', { name: /Pagar ahora/ }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Revisa los campos marcados en rojo.')
+    expect(screen.getByLabelText('Nombre *')).toHaveClass('is-invalid')
+
+    await user.click(screen.getByRole('radio', { name: 'Retiro en tienda' }))
+    expect(screen.queryByLabelText('Calle *')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'Despacho a domicilio' }))
+
+    await user.type(screen.getByLabelText('Nombre *'), 'Pedro')
+    await user.type(screen.getByLabelText('Apellidos *'), 'Hacker')
+    await user.type(screen.getByLabelText('Correo *'), 'pedro@gmail.com')
+    await user.type(screen.getByLabelText('Calle *'), 'Los Olmos 45')
+    await user.selectOptions(screen.getByLabelText('Región'), 'Región Metropolitana')
+    await user.selectOptions(screen.getByLabelText('Comuna'), 'Santiago')
+    await user.click(screen.getByRole('button', { name: /Pagar ahora/ }))
+
+    expect(await screen.findByText('Destino: /compra/exitosa/1')).toBeInTheDocument()
+    expect(obtenerOrdenes()[0]).toMatchObject({ estado: 'Pagada', cliente: { nombre: 'Pedro', correo: 'pedro@gmail.com' } })
     expect(getCart()).toEqual([])
     expect(obtenerProductoPorCodigo('TF-NB-004').stock).toBe(38)
   })

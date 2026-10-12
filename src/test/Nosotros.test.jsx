@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { fireEvent, screen, within } from '@testing-library/react'
-import { CLIENTE, ENTREGA_RETIRO, conSesion, escribir, hacerClick, renderEn } from './helpers.jsx'
+import { render, screen } from '@testing-library/react'
+import Nosotros from '../pages/Nosotros.jsx'
+import { vista } from './helpers.jsx'
 
-describe('Nosotros', () => {
-  it('muestra la información de la empresa', async () => {
-    renderEn('/nosotros')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Quiénes somos' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Nuestra misión' })).toBeInTheDocument()
+describe('Vista Nosotros', () => {
+  it('muestra el título, las cuatro secciones y las listas del equipo y motivos', () => {
+    render(vista(Nosotros, { ruta: '/nosotros' }))
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Quiénes somos' })).toBeInTheDocument()
+    for (const seccion of ['Nuestra historia', 'Nuestra misión', 'Nuestro equipo', '¿Por qué elegirnos?']) {
+      expect(screen.getByRole('heading', { level: 2, name: seccion })).toBeInTheDocument()
+    }
+    expect(screen.getAllByRole('listitem')).toHaveLength(6)
+    expect(screen.getByText('Atención a clientes y soporte post-venta.')).toBeInTheDocument()
   })
 })

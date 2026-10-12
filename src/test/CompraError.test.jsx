@@ -1,15 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { fireEvent, screen, within } from '@testing-library/react'
-import { CLIENTE, ENTREGA_RETIRO, conSesion, escribir, hacerClick, renderEn } from './helpers.jsx'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import CompraError from '../pages/CompraError.jsx'
+import { CLIENTE, ENTREGA_RETIRO, vista } from './helpers.jsx'
 import { procesarCompra } from '../services/ordenesService'
 
-describe('CompraError', () => {
-  it('muestra el pago fallido y permite reintentar con los mismos datos', async () => {
+describe('Vista CompraError', () => {
+  it('informa que el pago falló, muestra la orden a pagar y permite reintentar', async () => {
+    const user = userEvent.setup()
     const { orden } = procesarCompra({ carrito: [{ codigo: 'TF-NB-004', qty: 1 }], cliente: CLIENTE, entrega: ENTREGA_RETIRO, resultadoPago: 'rechazado' })
-    const router = renderEn(`/compra/error/${orden.id}`)
-    expect(await screen.findByText(/No se pudo realizar el pago/)).toBeInTheDocument()
-    hacerClick('Volver a realizar el pago')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Finalizar compra' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/checkout')
+    render(vista(CompraError, { ruta: `/compra/error/${orden.id}`, patron: '/compra/error/:id', datos: orden }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: /No se pudo realizar el pago/ })).toBeInTheDocument()
+    expect(screen.getByText('No se realizó ningún cobro y tus productos siguen en el carrito.')).toBeInTheDocument()
+    expect(screen.getByText('Total a pagar: $1.044.990')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Volver al carrito' })).toHaveAttribute('href', '/carrito')
+
+    await user.click(screen.getByRole('button', { name: 'Volver a realizar el pago' }))
+    expect(screen.getByText('Destino: /checkout')).toBeInTheDocument()
   })
 })
