@@ -1,24 +1,36 @@
 import { describe, expect, it } from 'vitest'
-import { fireEvent, screen, within } from '@testing-library/react'
-import { CLIENTE, ENTREGA_RETIRO, conSesion, escribir, hacerClick, renderEn } from './helpers.jsx'
-import { obtenerProductos } from '../services/productosService'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import AdminNuevoProducto from '../pages/admin/AdminNuevoProducto.jsx'
+import { entrarComoAdmin, vista } from './helpers.jsx'
+import { obtenerProductoPorCodigo, obtenerProductos } from '../services/productosService'
 
-describe('AdminNuevoProducto', () => {
-  it('valida y guarda un producto con descuento', async () => {
-    conSesion('Administrador', { id: 1 })
-    renderEn('/admin/productos/nuevo')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Nuevo producto' })).toBeInTheDocument()
-    escribir('Código producto', 'TF-TEST-1')
-    escribir('Nombre', 'Mouse de prueba')
-    escribir('Precio', '10000')
-    escribir('Stock', '5')
-    escribir('Categoría', 'Audio')
-    escribir('Descuento (%)', '150')
-    hacerClick('Guardar producto')
-    expect(screen.getByText('Revisa los campos marcados en rojo.')).toBeInTheDocument()
-    escribir('Descuento (%)', '20')
-    hacerClick('Guardar producto')
-    expect(screen.getByText('Producto guardado correctamente.')).toBeInTheDocument()
-    expect(obtenerProductos().find((p) => p.codigo === 'TF-TEST-1')).toMatchObject({ precio: 10000, stock: 5, descuento: 20 })
+describe('Vista AdminNuevoProducto', () => {
+  it('valida el formulario, rechaza un descuento inválido y guarda el producto', async () => {
+    const user = userEvent.setup()
+    entrarComoAdmin()
+    render(vista(AdminNuevoProducto, { ruta: '/admin/productos/nuevo' }))
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Nuevo producto' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Revisa los campos marcados en rojo.')
+    expect(obtenerProductos()).toHaveLength(21)
+
+    await user.type(screen.getByLabelText('Código producto'), 'TF-TEST-1')
+    await user.type(screen.getByLabelText('Nombre'), 'Mouse de prueba')
+    await user.type(screen.getByLabelText('Precio'), '10000')
+    await user.type(screen.getByLabelText('Stock'), '5')
+    await user.selectOptions(screen.getByLabelText('Categoría'), 'Accesorios')
+    await user.type(screen.getByLabelText('Descuento (%)'), '150')
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(screen.getByLabelText('Descuento (%)')).toHaveClass('is-invalid')
+    expect(obtenerProductoPorCodigo('TF-TEST-1')).toBeUndefined()
+
+    await user.clear(screen.getByLabelText('Descuento (%)'))
+    await user.type(screen.getByLabelText('Descuento (%)'), '20')
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Producto guardado correctamente.')
+    expect(obtenerProductoPorCodigo('TF-TEST-1')).toMatchObject({ precio: 10000, stock: 5, descuento: 20, categoria: 'Accesorios' })
+    expect(await screen.findByText('Destino: /admin/productos')).toBeInTheDocument()
   })
 })
