@@ -22,11 +22,11 @@ describe('Vista CompraExitosa', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: `✅ Se ha realizado la compra. nro #${orden.numero}` })).toBeInTheDocument()
     expect(screen.getByText(`Código orden: ${orden.codigo}`)).toBeInTheDocument()
-    expect(screen.getByText('Puedes imprimir tu boleta o enviarla a pedro@gmail.com.')).toBeInTheDocument()
+    expect(screen.getByText('Puedes imprimir tu boleta o enviarla a pedro@duocuc.cl.')).toBeInTheDocument()
     expect(screen.getByText('Pedro Hacker')).toBeInTheDocument()
     expect(screen.getByText('Lenovo Yoga 920')).toBeInTheDocument()
     expect(screen.getByText('Total pagado: $1.044.990')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Enviar boleta por email' })).toHaveAttribute('href', expect.stringContaining('mailto:pedro@gmail.com'))
+    expect(screen.getByRole('link', { name: 'Enviar boleta por email' })).toHaveAttribute('href', expect.stringContaining('mailto:pedro@duocuc.cl'))
 
     await user.click(screen.getByRole('button', { name: 'Imprimir boleta en PDF' }))
     expect(impreso).toBe(true)

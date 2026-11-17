@@ -1,13 +1,13 @@
 import { STORAGE_KEYS } from '../data/constantes'
 
-// Usuario administrador que viene "de fábrica" para poder entrar al
-// panel la primera vez. Credenciales: admin@duoc.cl / admin123
+// Usuario de demostración que usa el CRUD local de usuarios del panel.
+// NO sirve para iniciar sesión desde la tienda: el login va contra la API real.
 const USUARIO_ADMIN_BASE = {
   id: 1,
   run: '123456785',
   nombre: 'Admin',
   apellidos: 'Tecno Factory',
-  correo: 'admin@duoc.cl',
+  correo: 'ro.padron@duocuc.cl',
   contrasena: 'admin123',
   fecha_nacimiento: '',
   tipo: 'Administrador',
@@ -24,15 +24,16 @@ export function obtenerUsuarios() {
   }
   const usuarios = JSON.parse(data)
 
-  // Migración: versiones antiguas guardaron el admin con un correo
-  // @tecnofactory.cl que el login rechaza; lo actualizamos.
+  // Migración: versiones antiguas guardaron el admin con otro correo
+  // (@tecnofactory.cl o @duoc.cl); lo actualizamos al dominio vigente.
   let seModifico = false
   usuarios.forEach((u) => {
+    const correoViejo = (u.correo || '').toLowerCase()
     if (
       u.id === 1 &&
       u.tipo === 'Administrador' &&
       u.correo !== USUARIO_ADMIN_BASE.correo &&
-      u.correo.toLowerCase().includes('@tecnofactory.cl')
+      (correoViejo.includes('@tecnofactory.cl') || correoViejo.endsWith('@duoc.cl'))
     ) {
       u.correo = USUARIO_ADMIN_BASE.correo
       if (!u.contrasena) u.contrasena = USUARIO_ADMIN_BASE.contrasena
@@ -129,6 +130,12 @@ export function obtenerSesion() {
   } catch {
     return null
   }
+}
+
+/** Guarda la sesión (p. ej. la que devuelve la API con su JWT) y la devuelve. */
+export function guardarSesion(sesion) {
+  localStorage.setItem(STORAGE_KEYS.sesion, JSON.stringify(sesion))
+  return sesion
 }
 
 export function cerrarSesion() {

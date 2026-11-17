@@ -10,7 +10,7 @@ const comprar = (resultadoPago) =>
   procesarCompra({
     carrito: [{ codigo: 'TF-NB-004', qty: 1 }],
     usuarioId: 1,
-    cliente: { nombre: 'Admin', apellidos: 'Tecno Factory', correo: 'admin@duoc.cl' },
+    cliente: { nombre: 'Admin', apellidos: 'Tecno Factory', correo: 'ro.padron@duocuc.cl' },
     entrega: ENTREGA_RETIRO,
     resultadoPago,
   })

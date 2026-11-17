@@ -108,6 +108,15 @@ const rutasTienda = {
         { path: 'contacto', lazy: pagina(() => import('./pages/Contacto.jsx')) },
         { path: 'iniciar-sesion', lazy: pagina(() => import('./pages/IniciarSesion.jsx')) },
         { path: 'registro', lazy: pagina(() => import('./pages/RegistroUsuario.jsx')) },
+        {
+          path: 'registro/google',
+          lazy: pagina(() => import('./pages/RegistroGoogle.jsx')),
+        },
+        {
+          path: 'mi-cuenta',
+          element: <RequireRole roles={[ROLES.admin, ROLES.vendedor, ROLES.cliente]} />,
+          children: [{ index: true, lazy: pagina(() => import('./pages/MiCuenta.jsx')) }],
+        },
         { path: '*', Component: NotFound },
       ],
     },

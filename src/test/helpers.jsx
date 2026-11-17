@@ -38,13 +38,13 @@ export function vista(Vista, { ruta = '/', patron = ruta.split('?')[0], datos, e
 }
 
 /** Inicia sesión con el administrador que viene de fábrica (id 1). */
-export const entrarComoAdmin = () => iniciarSesion('admin@duoc.cl', 'admin123')
+export const entrarComoAdmin = () => iniciarSesion('ro.padron@duocuc.cl', 'admin123')
 
 export const DATOS_USUARIO = {
   run: '190110222',
   nombre: 'Vera',
   apellidos: 'Rojas',
-  correo: 'vera@duoc.cl',
+  correo: 'vera@duocuc.cl',
   contrasena: 'vend1',
   tipo: 'Vendedor',
   region: 'Región Metropolitana',
@@ -58,5 +58,5 @@ export function entrarComoVendedor() {
   return iniciarSesion(DATOS_USUARIO.correo, DATOS_USUARIO.contrasena)
 }
 
-export const CLIENTE = { nombre: 'Pedro', apellidos: 'Hacker', correo: 'pedro@gmail.com' }
+export const CLIENTE = { nombre: 'Pedro', apellidos: 'Hacker', correo: 'pedro@duocuc.cl' }
 export const ENTREGA_RETIRO = { tipo: 'retiro', calle: '', departamento: '', region: '', comuna: '', indicaciones: '' }

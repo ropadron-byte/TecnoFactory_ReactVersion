@@ -69,8 +69,8 @@ export default function Contacto() {
           <FormField
             id="correo"
             label="Correo electrónico"
-            hint="Solo se aceptan correos @duoc.cl, @profesor.duoc.cl o @gmail.com."
-            error="Ingresa un correo válido de dominio @duoc.cl, @profesor.duoc.cl o @gmail.com."
+            hint="Puedes usar cualquier dominio de correo."
+            error="Ingresa un correo válido."
             estado={estadoCampo('correo')}
           >
             <input
@@ -79,7 +79,7 @@ export default function Contacto() {
               name="correo"
               maxLength={100}
               autoComplete="email"
-              placeholder="nombre@gmail.com"
+              placeholder="nombre@correo.cl"
               value={valores.correo}
               onChange={cambiar}
             />

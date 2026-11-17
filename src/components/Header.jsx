@@ -52,6 +52,9 @@ export default function Header() {
                     Panel admin
                   </Nav.Link>
                 )}
+                <Nav.Link as={NavLink} to="/mi-cuenta" onClick={cerrarMenu}>
+                  Mi cuenta
+                </Nav.Link>
                 <Nav.Link href="#" onClick={salir} title={`Cerrar sesión de ${sesion.nombre}`}>
                   Cerrar sesión (<span className="d-inline-block text-truncate align-bottom" style={{ maxWidth: '6ch' }}>{sesion.nombre}</span>)
                 </Nav.Link>

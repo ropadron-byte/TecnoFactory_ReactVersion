@@ -38,6 +38,6 @@ describe('Vista AdminReportes', () => {
     await user.click(screen.getByRole('button', { name: 'Descargar órdenes en CSV' }))
     const texto = await archivo.text()
     expect(texto).toContain('"N° boleta","Código","Fecha","Cliente","Correo","Estado","Total"')
-    expect(texto).toContain('"Pedro Hacker","pedro@gmail.com","Pagada","1044990"')
+    expect(texto).toContain('"Pedro Hacker","pedro@duocuc.cl","Pagada","1044990"')
   })
 })

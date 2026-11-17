@@ -19,7 +19,7 @@ describe('Vista AdminUsuarios', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Usuarios' })).toBeInTheDocument()
     expect(screen.getByText('Admin Tecno Factory')).toBeInTheDocument()
-    expect(screen.getByText('admin@duoc.cl')).toBeInTheDocument()
+    expect(screen.getByText('ro.padron@duocuc.cl')).toBeInTheDocument()
     expect(screen.getByText('Vera Rojas')).toBeInTheDocument()
     expect(screen.getByText('Vendedor')).toBeInTheDocument()
 

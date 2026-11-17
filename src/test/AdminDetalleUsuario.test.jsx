@@ -12,7 +12,7 @@ describe('Vista AdminDetalleUsuario', () => {
     render(vista(AdminDetalleUsuario, { ruta: '/admin/usuarios/1', patron: '/admin/usuarios/:id', datos: obtenerUsuarioPorId(1) }))
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Admin Tecno Factory' })).toBeInTheDocument()
-    for (const dato of ['123456785', 'admin@duoc.cl', 'Administrador', 'Región Metropolitana', 'Santiago', 'No especificada']) {
+    for (const dato of ['123456785', 'ro.padron@duocuc.cl', 'Administrador', 'Región Metropolitana', 'Santiago', 'No especificada']) {
       expect(screen.getByText(dato)).toBeInTheDocument()
     }
     expect(screen.getByRole('link', { name: 'Editar' })).toHaveAttribute('href', '/admin/usuarios/1/editar')

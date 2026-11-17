@@ -13,7 +13,7 @@ describe('Vista AdminEditarUsuario', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Editar usuario' })).toBeInTheDocument()
     expect(screen.getByLabelText('Nombre')).toHaveValue('Admin')
-    expect(screen.getByLabelText('Correo')).toHaveValue('admin@duoc.cl')
+    expect(screen.getByLabelText('Correo')).toHaveValue('ro.padron@duocuc.cl')
     expect(screen.getByLabelText('Tipo de usuario')).toHaveValue('Administrador')
     expect(screen.getByLabelText('Nueva contraseña')).toHaveValue('')
 

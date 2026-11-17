@@ -1,13 +1,27 @@
 import AdminHeader from '../../components/AdminHeader.jsx'
 import UsuarioForm from '../../components/UsuarioForm.jsx'
+import DatosCuenta from '../../components/DatosCuenta.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { actualizarUsuario, obtenerUsuarioPorId } from '../../services/usuariosService'
 import usePageTitle from '../../hooks/usePageTitle'
 
-// Perfil: cada usuario del panel edita sus propios datos (no su tipo ni su RUN).
+// Perfil: con sesión real (API) muestra los datos del JWT; con la sesión
+// local de demostración permite editar el usuario guardado en localStorage.
 export default function AdminPerfil() {
   usePageTitle('Perfil', 'Panel Tecno Factory')
   const { sesion, recargarSesion } = useAuth()
+
+  if (sesion?.origen === 'api') {
+    return (
+      <>
+        <AdminHeader titulo="Mi perfil" />
+        <section>
+          <DatosCuenta />
+        </section>
+      </>
+    )
+  }
+
   const usuario = obtenerUsuarioPorId(sesion.id)
 
   if (!usuario) {

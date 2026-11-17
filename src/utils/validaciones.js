@@ -1,5 +1,3 @@
-import { DOMINIOS_PERMITIDOS } from '../data/constantes'
-
 const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /** Valida un RUN chileno (con o sin puntos/guion) usando el dígito verificador. */
@@ -19,18 +17,43 @@ export function validarRun(run) {
   return dv === dvEsperado
 }
 
-/** ¿El correo tiene formato válido y un dominio permitido? (máx. 100 caracteres) */
+/** ¿El correo tiene un formato válido? (máx. 100 caracteres, cualquier dominio) */
 export function correoValido(valor) {
   const correo = String(valor ?? '').trim()
-  if (correo.length > 100 || !FORMATO_CORREO.test(correo)) return false
-  const dominio = correo.split('@')[1].toLowerCase()
-  return DOMINIOS_PERMITIDOS.includes(dominio)
+  return correo.length <= 100 && FORMATO_CORREO.test(correo)
 }
 
-/** La contraseña debe tener entre 4 y 10 caracteres. */
+/** La contraseña debe tener entre 4 y 10 caracteres (panel local de demostración). */
 export function contrasenaValida(valor) {
   const largo = String(valor ?? '').length
   return largo >= 4 && largo <= 10
+}
+
+/** Contraseña para la API real: 8 a 72 caracteres (misma regla que el backend). */
+export function contrasenaApiValida(valor) {
+  const largo = String(valor ?? '').length
+  return largo >= 8 && largo <= 72
+}
+
+/** Separa un RUN "190110222" en { run: 19011022, runDv: '2' } (lo que pide la API). */
+export function separarRun(run) {
+  const limpio = String(run ?? '').replace(/[^0-9kK]/g, '').toUpperCase()
+  return { run: Number(limpio.slice(0, -1)), runDv: limpio.slice(-1) }
+}
+
+/** Teléfono chileno/internacional: 8 a 14 dígitos, con + opcional. */
+export function telefonoValido(valor) {
+  return /^\+?[0-9]{8,14}$/.test(String(valor ?? '').trim())
+}
+
+/** ¿La fecha (YYYY-MM-DD) es válida y anterior a hoy? */
+export function fechaNacimientoValida(valor) {
+  if (!valor) return false
+  const fecha = new Date(`${valor}T00:00:00`)
+  if (Number.isNaN(fecha.getTime())) return false
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+  return fecha < hoy
 }
 
 // ---------- Productos (panel de administración) ----------

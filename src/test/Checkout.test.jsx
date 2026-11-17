@@ -26,14 +26,14 @@ describe('Vista Checkout', () => {
 
     await user.type(screen.getByLabelText('Nombre *'), 'Pedro')
     await user.type(screen.getByLabelText('Apellidos *'), 'Hacker')
-    await user.type(screen.getByLabelText('Correo *'), 'pedro@gmail.com')
+    await user.type(screen.getByLabelText('Correo *'), 'pedro@duocuc.cl')
     await user.type(screen.getByLabelText('Calle *'), 'Los Olmos 45')
     await user.selectOptions(screen.getByLabelText('Región'), 'Región Metropolitana')
     await user.selectOptions(screen.getByLabelText('Comuna'), 'Santiago')
     await user.click(screen.getByRole('button', { name: /Pagar ahora/ }))
 
     expect(await screen.findByText('Destino: /compra/exitosa/1')).toBeInTheDocument()
-    expect(obtenerOrdenes()[0]).toMatchObject({ estado: 'Pagada', cliente: { nombre: 'Pedro', correo: 'pedro@gmail.com' } })
+    expect(obtenerOrdenes()[0]).toMatchObject({ estado: 'Pagada', cliente: { nombre: 'Pedro', correo: 'pedro@duocuc.cl' } })
     expect(getCart()).toEqual([])
     expect(obtenerProductoPorCodigo('TF-NB-004').stock).toBe(38)
   })

@@ -51,9 +51,9 @@
 
         <div class="field" id="field-correo">
           <label for="correo">Correo</label>
-          <span class="hint">Solo dominios @duoc.cl, @profesor.duoc.cl o @gmail.com</span>
+          <span class="hint">Puedes usar cualquier dominio de correo.</span>
           <input type="email" id="correo" name="correo" maxlength="100" required autocomplete="email">
-          <span class="error-msg">Correo inválido, dominio no permitido, o ya está en uso por otro usuario.</span>
+          <span class="error-msg">Correo inválido o ya está en uso por otro usuario.</span>
         </div>
 
         <div class="field" id="field-contrasena">
@@ -145,18 +145,13 @@
 
     const form = document.getElementById("form-usuario");
     const status = document.getElementById("form-status");
-    const DOMINIOS_PERMITIDOS = ["duoc.cl", "profesor.duoc.cl", "gmail.com"];
-
     function marcar(fieldId, valido) {
       document.getElementById(fieldId).classList.remove("invalid", "valid");
       document.getElementById(fieldId).classList.add(valido ? "valid" : "invalid");
     }
 
     function correoValido(valor) {
-      const formato = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
-      if (!formato) return false;
-      const dominio = valor.split("@")[1].toLowerCase();
-      return DOMINIOS_PERMITIDOS.indexOf(dominio) !== -1;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
     }
 
     form.addEventListener("submit", function (e) {

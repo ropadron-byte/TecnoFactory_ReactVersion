@@ -159,8 +159,8 @@ export default function Checkout() {
           <FormField
             id="correo"
             label="Correo *"
-            hint="Solo dominios @duoc.cl, @profesor.duoc.cl o @gmail.com"
-            error="Ingresa un correo válido de dominio @duoc.cl, @profesor.duoc.cl o @gmail.com."
+            hint="Te enviaremos la boleta a este correo."
+            error="Ingresa un correo válido."
             estado={marca('correo')}
           >
             <input type="email" id="correo" name="correo" maxLength={100} autoComplete="email" value={v.correo} onChange={cambiar} />

@@ -111,11 +111,11 @@ export default function UsuarioForm({
       <FormField
         id="correo"
         label="Correo"
-        hint="Solo dominios @duoc.cl, @profesor.duoc.cl o @gmail.com"
+        hint="Puedes usar cualquier dominio de correo."
         error={
           editando
-            ? 'Correo inválido, dominio no permitido, o ya está en uso por otro usuario.'
-            : 'Correo inválido, dominio no permitido, o ya está registrado.'
+            ? 'Correo inválido o ya está en uso por otro usuario.'
+            : 'Correo inválido o ya está registrado.'
         }
         estado={marca('correo')}
       >

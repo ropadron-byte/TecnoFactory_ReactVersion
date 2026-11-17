@@ -11,9 +11,6 @@ export const ICONOS_CATEGORIA = {
   Smartphones: '📱',
 }
 
-// Solo se aceptan estos dominios de correo (criterio de la pauta).
-export const DOMINIOS_PERMITIDOS = ['duoc.cl', 'profesor.duoc.cl', 'gmail.com']
-
 // Claves de localStorage. Son las MISMAS que usa el panel de
 // administración (public/admin), así ambos comparten los datos.
 export const STORAGE_KEYS = {
