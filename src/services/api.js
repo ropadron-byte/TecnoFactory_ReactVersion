@@ -25,31 +25,15 @@ const MENSAJES = {
   500: 'Ocurrió un error en el servidor.',
 }
 
-/**
- * Hace una petición a la API y devuelve el JSON de la respuesta.
- * Lanza `ApiError` si la respuesta no es 2xx (salvo 204, que devuelve null).
- */
-export async function peticion(ruta, { metodo = 'GET', cuerpo, token, signal } = {}) {
-  const headers = { Accept: 'application/json' }
-  if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
-  if (token) headers.Authorization = `Bearer ${token}`
+function errorDeRed() {
+  return new ApiError(
+    0,
+    `No se pudo conectar con el servidor (${BASE}). Verifica que el backend esté corriendo.`,
+  )
+}
 
-  let respuesta
-  try {
-    respuesta = await fetch(`${BASE}${ruta}`, {
-      method: metodo,
-      headers,
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
-      signal,
-    })
-  } catch (error) {
-    if (error?.name === 'AbortError') throw error
-    throw new ApiError(
-      0,
-      `No se pudo conectar con el servidor (${BASE}). Verifica que el backend esté corriendo.`,
-    )
-  }
-
+/** Interpreta la respuesta compartida por las peticiones JSON y multipart. */
+async function leerRespuesta(respuesta) {
   if (respuesta.status === 204) return null
 
   const texto = await respuesta.text()
@@ -71,4 +55,53 @@ export async function peticion(ruta, { metodo = 'GET', cuerpo, token, signal } =
   }
 
   return datos
+}
+
+/**
+ * Hace una petición JSON a la API y devuelve el JSON de la respuesta.
+ * Lanza `ApiError` si la respuesta no es 2xx (salvo 204, que devuelve null).
+ */
+export async function peticion(ruta, { metodo = 'GET', cuerpo, token, signal } = {}) {
+  const headers = { Accept: 'application/json' }
+  if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  let respuesta
+  try {
+    respuesta = await fetch(`${BASE}${ruta}`, {
+      method: metodo,
+      headers,
+      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+      signal,
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error
+    throw errorDeRed()
+  }
+
+  return leerRespuesta(respuesta)
+}
+
+/**
+ * Petición multipart para subir archivos. No se fija Content-Type: el navegador
+ * debe agregar el boundary de FormData. El backend devuelve JSON (o 204).
+ */
+export async function peticionFormData(ruta, { metodo = 'POST', formData, token, signal } = {}) {
+  const headers = { Accept: 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  let respuesta
+  try {
+    respuesta = await fetch(`${BASE}${ruta}`, {
+      method: metodo,
+      headers,
+      body: formData,
+      signal,
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error
+    throw errorDeRed()
+  }
+
+  return leerRespuesta(respuesta)
 }

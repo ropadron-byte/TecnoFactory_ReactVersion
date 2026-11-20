@@ -1,9 +1,7 @@
 import { createMemoryRouter, RouterProvider, useLocation } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext.jsx'
 import { CartProvider } from '../context/CartContext.jsx'
-import { guardarUsuario, iniciarSesion } from '../services/usuariosService'
-
-// Ayudas para probar UNA vista de forma aislada (sin Layout ni el resto de la app).
+import { guardarSesion } from '../services/usuariosService'
 
 /** Rutas a las que la vista navega: muestran "Destino: <ruta>" para poder comprobarlo con getByText. */
 function Destino() {
@@ -12,12 +10,8 @@ function Destino() {
 }
 
 /**
- * Devuelve la vista lista para pasarla a `render(...)`, con sus proveedores
- * (sesión y carrito) y un router mínimo de una sola ruta.
- *  - ruta:   URL inicial (puede incluir ?query)
- *  - patron: patrón de la ruta (ej. '/productos/:codigo')
- *  - datos:  lo que devolvería el loader de la ruta (useLoaderData)
- *  - estado: location.state inicial
+ * Devuelve la vista lista para pasarla a `render(...)`, con sesión API y router
+ * mínimo de una sola ruta. No se usan datos locales de demostración.
  */
 export function vista(Vista, { ruta = '/', patron = ruta.split('?')[0], datos, estado } = {}) {
   const rutaVista = { path: patron, Component: Vista }
@@ -37,26 +31,23 @@ export function vista(Vista, { ruta = '/', patron = ruta.split('?')[0], datos, e
   )
 }
 
-/** Inicia sesión con el administrador que viene de fábrica (id 1). */
-export const entrarComoAdmin = () => iniciarSesion('ro.padron@duocuc.cl', 'admin123')
-
-export const DATOS_USUARIO = {
-  run: '190110222',
-  nombre: 'Vera',
-  apellidos: 'Rojas',
-  correo: 'vera@duocuc.cl',
-  contrasena: 'vend1',
-  tipo: 'Vendedor',
+/** Sesión con JWT que usan las pruebas de las vistas del panel. */
+export const ADMIN_SESION = {
+  token: 'jwt-de-prueba',
+  origen: 'api',
+  id: 1,
+  run: '12345678',
+  runDv: '5',
+  nombre: 'Admin',
+  apellidos: 'Tecno Factory',
+  correo: 'ro.padron@duocuc.cl',
+  tipo: 'Administrador',
+  activo: true,
   region: 'Región Metropolitana',
   comuna: 'Santiago',
-  direccion: 'Av. Siempre Viva 123',
+  direccion: 'Casa Matriz Tecno Factory',
+  fecha_nacimiento: '',
+  telefono: '',
 }
 
-/** Crea un usuario Vendedor e inicia su sesión. */
-export function entrarComoVendedor() {
-  guardarUsuario(DATOS_USUARIO)
-  return iniciarSesion(DATOS_USUARIO.correo, DATOS_USUARIO.contrasena)
-}
-
-export const CLIENTE = { nombre: 'Pedro', apellidos: 'Hacker', correo: 'pedro@duocuc.cl' }
-export const ENTREGA_RETIRO = { tipo: 'retiro', calle: '', departamento: '', region: '', comuna: '', indicaciones: '' }
+export const entrarComoAdmin = () => guardarSesion({ ...ADMIN_SESION })

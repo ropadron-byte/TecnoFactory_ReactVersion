@@ -14,6 +14,7 @@ import usePageTitle from '../../hooks/usePageTitle'
 const ACCESOS = [
   { to: '/admin/ordenes', icono: '🧾', titulo: 'Órdenes', texto: 'Seguimiento de las compras realizadas y sus boletas.' },
   { to: '/admin/productos', icono: '📦', titulo: 'Productos', texto: 'Inventario y detalle de los productos disponibles.' },
+  { to: '/admin/blogs', icono: '📰', titulo: 'Blogs', texto: 'Publicaciones, portadas y galerías del sitio.' },
   { to: '/admin/categorias', icono: '🏷️', titulo: 'Categorías', texto: 'Organiza los productos en categorías.', soloAdmin: true },
   { to: '/admin/usuarios', icono: '👤', titulo: 'Usuarios', texto: 'Cuentas de usuario y sus roles dentro del sistema.', soloAdmin: true },
   { to: '/admin/reportes', icono: '📊', titulo: 'Reportes', texto: 'Informes de ventas y de usuarios del sistema.', soloAdmin: true },

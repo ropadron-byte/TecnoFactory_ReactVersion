@@ -9,7 +9,7 @@ import { obtenerProductoPorCodigo } from './services/productosService'
 import { buscarUsuario } from './services/usuariosApi'
 import { obtenerCategoriaPorId, obtenerCategoriaPorSlug } from './services/categoriasService'
 import { obtenerOrdenPorId } from './services/ordenesService'
-import { BLOGS } from './data/blogs'
+import { buscarBlog, buscarBlogGestion } from './services/blogsApi'
 import { ROLES } from './data/constantes'
 
 // Carga diferida: cada página se descarga solo cuando se visita.
@@ -25,10 +25,20 @@ function loaderProducto({ params }) {
   return producto
 }
 
-function loaderBlog({ params }) {
-  const blog = BLOGS.find((b) => b.slug === params.slug && b.disponible)
-  if (!blog) throw noEncontrado('Artículo no encontrado')
-  return blog
+async function loaderBlog({ params }) {
+  try {
+    return await buscarBlog(Number(params.id))
+  } catch {
+    throw noEncontrado('Artículo no encontrado')
+  }
+}
+
+async function loaderBlogGestion({ params }) {
+  try {
+    return await buscarBlogGestion(Number(params.id))
+  } catch {
+    throw noEncontrado('Blog no encontrado')
+  }
 }
 
 async function loaderUsuario({ params }) {
@@ -103,7 +113,7 @@ const rutasTienda = {
         { path: 'nosotros', lazy: pagina(() => import('./pages/Nosotros.jsx')) },
         { path: 'blogs', lazy: pagina(() => import('./pages/Blogs.jsx')) },
         {
-          path: 'blogs/:slug',
+          path: 'blogs/:id',
           loader: loaderBlog,
           lazy: pagina(() => import('./pages/DetalleBlog.jsx')),
         },
@@ -157,6 +167,20 @@ const rutasAdmin = {
               path: 'productos/:codigo',
               loader: loaderProducto,
               lazy: pagina(() => import('./pages/admin/AdminDetalleProducto.jsx')),
+            },
+
+            // Blogs: administrador y vendedor pueden gestionarlos (igual que la API)
+            { path: 'blogs', lazy: pagina(() => import('./pages/admin/AdminBlogs.jsx')) },
+            { path: 'blogs/nuevo', lazy: pagina(() => import('./pages/admin/AdminNuevoBlog.jsx')) },
+            {
+              path: 'blogs/:id',
+              loader: loaderBlogGestion,
+              lazy: pagina(() => import('./pages/admin/AdminDetalleBlog.jsx')),
+            },
+            {
+              path: 'blogs/:id/editar',
+              loader: loaderBlogGestion,
+              lazy: pagina(() => import('./pages/admin/AdminEditarBlog.jsx')),
             },
 
             // Solo Administrador

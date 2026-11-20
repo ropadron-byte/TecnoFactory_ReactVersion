@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminEditarUsuario from '../pages/admin/AdminEditarUsuario.jsx'
 import { entrarComoAdmin, vista } from './helpers.jsx'
-import { obtenerSesion, obtenerUsuarioPorId } from '../services/usuariosService'
+import { obtenerSesion } from '../services/usuariosService'
 
 vi.mock('../services/usuariosApi.js', () => ({
   actualizarUsuario: vi.fn(),
@@ -30,7 +30,15 @@ describe('Vista AdminEditarUsuario', () => {
     const user = userEvent.setup()
     entrarComoAdmin()
     const datos = {
-      ...obtenerUsuarioPorId(1),
+      id: 1,
+      run: '123456785',
+      nombre: 'Admin',
+      apellidos: 'Tecno Factory',
+      correo: 'ro.padron@duocuc.cl',
+      tipo: 'Administrador',
+      region: 'Región Metropolitana',
+      comuna: 'Santiago',
+      direccion: 'Casa Matriz Tecno Factory',
       telefono: '+56912345678',
       fecha_nacimiento: '1990-01-01',
       activo: true,
