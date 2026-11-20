@@ -11,5 +11,7 @@ export const tieneOferta = (producto) => descuentoDe(producto) > 0
 
 /** Precio que efectivamente paga el cliente (con el descuento aplicado). */
 export function precioFinal(producto) {
-  return Math.round(producto.precio * (1 - descuentoDe(producto) / 100))
+  // Mismo cálculo que el backend (multiplicar primero, dividir después): con decimales
+  // (1 - d/100) algunos precios se redondeaban $1 distinto al de la boleta.
+  return Math.round((producto.precio * (100 - descuentoDe(producto))) / 100)
 }

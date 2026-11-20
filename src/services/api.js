@@ -1,21 +1,30 @@
-// Cliente HTTP mínimo para hablar con la API de Spring Boot.
+// Cliente HTTP del backend (Spring Boot).
+// Compatible con dos formas de llamar:
+//  - peticion(ruta, { metodo, cuerpo, token, signal })      -> rutas /api/... ya completas
+//  - peticion(metodo, ruta, { cuerpo, params, autenticar }) -> rutas bajo /api/v1
 // La URL se configura con VITE_API_URL (por defecto, el backend local).
 
-const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
+export const API_URL = (import.meta.env?.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
+export const API_V1 = `${API_URL}/api/v1`
 
-export const API_URL = BASE
-
-/** Error de la API: conserva el status HTTP y los detalles de validación. */
+/** Error de una llamada al backend. status 0 = no hubo respuesta. */
 export class ApiError extends Error {
-  constructor(status, mensaje, detalles) {
+  constructor(status, mensaje, detalles = null) {
     super(mensaje)
     this.name = 'ApiError'
     this.status = status
     this.mensaje = mensaje
-    this.detalles = detalles ?? null
+    this.detalles = detalles
   }
 }
 
+// Token JWT en localStorage (lo usan las rutas /api/v1 y el catálogo).
+export const CLAVE_TOKEN = 'tf_token'
+export const obtenerToken = () => localStorage.getItem(CLAVE_TOKEN)
+export const guardarToken = (token) => localStorage.setItem(CLAVE_TOKEN, token)
+export const borrarToken = () => localStorage.removeItem(CLAVE_TOKEN)
+
+// Mensajes para el estilo directo (tus servicios de blogs/usuarios/imágenes/auth).
 const MENSAJES = {
   400: 'Revisa los datos enviados.',
   401: 'Correo o contraseña incorrectos.',
@@ -25,14 +34,81 @@ const MENSAJES = {
   500: 'Ocurrió un error en el servidor.',
 }
 
-function errorDeRed() {
-  return new ApiError(
-    0,
-    `No se pudo conectar con el servidor (${BASE}). Verifica que el backend esté corriendo.`,
-  )
+// Mensajes para el estilo /api/v1 (catálogo de tu compañero).
+const MENSAJES_POR_ESTADO = {
+  400: 'Los datos enviados no son válidos.',
+  401: 'Debes iniciar sesión para continuar.',
+  403: 'No tienes permiso para hacer esto.',
+  404: 'No se encontró lo que buscas.',
+  409: 'La operación no se puede realizar en el estado actual.',
 }
 
-/** Interpreta la respuesta compartida por las peticiones JSON y multipart. */
+function mensajeDeError(status, cuerpo) {
+  if (cuerpo && typeof cuerpo === 'object' && cuerpo.mensaje) return cuerpo.mensaje
+  if (MENSAJES_POR_ESTADO[status]) return MENSAJES_POR_ESTADO[status]
+  return status >= 500
+    ? 'Error interno del servidor. Inténtalo más tarde.'
+    : 'No se pudo completar la solicitud.'
+}
+
+// ---------- estilo /api/v1 (catálogo) ----------
+
+function armarUrl(ruta, params) {
+  const consulta = new URLSearchParams()
+  for (const [clave, valor] of Object.entries(params ?? {})) {
+    const valores = Array.isArray(valor) ? valor : [valor]
+    valores.forEach((v) => {
+      if (v !== undefined && v !== null && v !== '') consulta.append(clave, String(v))
+    })
+  }
+  const texto = consulta.toString()
+  const camino = ruta.startsWith('/') ? ruta : `/${ruta}`
+  return `${API_V1}${camino}${texto ? `?${texto}` : ''}`
+}
+
+async function leerCuerpo(respuesta) {
+  const texto = await respuesta.text()
+  if (!texto) return null
+  try {
+    return JSON.parse(texto)
+  } catch {
+    return texto
+  }
+}
+
+async function peticionV1(metodo, ruta, { cuerpo, params, autenticar = true } = {}) {
+  const headers = { Accept: 'application/json' }
+  const token = autenticar ? obtenerToken() : null
+  if (token) headers.Authorization = `Bearer ${token}`
+  if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
+
+  let respuesta
+  try {
+    respuesta = await fetch(armarUrl(ruta, params), {
+      method: metodo,
+      headers,
+      body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined,
+    })
+  } catch {
+    throw new ApiError(0, 'No se pudo conectar con el servidor. Revisa que el backend esté encendido.')
+  }
+
+  const datos = await leerCuerpo(respuesta)
+  if (respuesta.ok) return datos
+
+  // Un 401 con token significa que venció: se descarta.
+  if (respuesta.status === 401 && token) borrarToken()
+  throw new ApiError(respuesta.status, mensajeDeError(respuesta.status, datos), datos?.detalles ?? null)
+}
+
+export const get = (ruta, opciones) => peticionV1('GET', ruta, opciones)
+export const post = (ruta, cuerpo, opciones) => peticionV1('POST', ruta, { ...opciones, cuerpo })
+export const put = (ruta, cuerpo, opciones) => peticionV1('PUT', ruta, { ...opciones, cuerpo })
+export const patch = (ruta, cuerpo, opciones) => peticionV1('PATCH', ruta, { ...opciones, cuerpo })
+export const eliminar = (ruta, opciones) => peticionV1('DELETE', ruta, opciones)
+
+// ---------- estilo directo (tus rutas /api/...) ----------
+
 async function leerRespuesta(respuesta) {
   if (respuesta.status === 204) return null
 
@@ -57,18 +133,23 @@ async function leerRespuesta(respuesta) {
   return datos
 }
 
-/**
- * Hace una petición JSON a la API y devuelve el JSON de la respuesta.
- * Lanza `ApiError` si la respuesta no es 2xx (salvo 204, que devuelve null).
- */
-export async function peticion(ruta, { metodo = 'GET', cuerpo, token, signal } = {}) {
+function errorDeRed() {
+  return new ApiError(
+    0,
+    `No se pudo conectar con el servidor (${API_URL}). Verifica que el backend esté corriendo.`,
+  )
+}
+
+async function peticionDirecta(ruta, { metodo = 'GET', cuerpo, token, signal } = {}) {
   const headers = { Accept: 'application/json' }
   if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
-  if (token) headers.Authorization = `Bearer ${token}`
+
+  const tokenFinal = token ?? obtenerToken()
+  if (tokenFinal) headers.Authorization = `Bearer ${tokenFinal}`
 
   let respuesta
   try {
-    respuesta = await fetch(`${BASE}${ruta}`, {
+    respuesta = await fetch(`${API_URL}${ruta}`, {
       method: metodo,
       headers,
       body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
@@ -82,17 +163,15 @@ export async function peticion(ruta, { metodo = 'GET', cuerpo, token, signal } =
   return leerRespuesta(respuesta)
 }
 
-/**
- * Petición multipart para subir archivos. No se fija Content-Type: el navegador
- * debe agregar el boundary de FormData. El backend devuelve JSON (o 204).
- */
+/** Sube archivos. No fija Content-Type: FormData agrega el boundary. */
 export async function peticionFormData(ruta, { metodo = 'POST', formData, token, signal } = {}) {
   const headers = { Accept: 'application/json' }
-  if (token) headers.Authorization = `Bearer ${token}`
+  const tokenFinal = token ?? obtenerToken()
+  if (tokenFinal) headers.Authorization = `Bearer ${tokenFinal}`
 
   let respuesta
   try {
-    respuesta = await fetch(`${BASE}${ruta}`, {
+    respuesta = await fetch(`${API_URL}${ruta}`, {
       method: metodo,
       headers,
       body: formData,
@@ -104,4 +183,14 @@ export async function peticionFormData(ruta, { metodo = 'POST', formData, token,
   }
 
   return leerRespuesta(respuesta)
+}
+
+const METODOS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+
+/** Compatible con las dos formas usadas en el proyecto. */
+export async function peticion(rutaOMetodo, rutaUOpciones = {}, opcionesV1 = {}) {
+  if (METODOS.has(rutaOMetodo) && typeof rutaUOpciones === 'string') {
+    return peticionV1(rutaOMetodo, rutaUOpciones, opcionesV1)
+  }
+  return peticionDirecta(rutaOMetodo, rutaUOpciones)
 }
