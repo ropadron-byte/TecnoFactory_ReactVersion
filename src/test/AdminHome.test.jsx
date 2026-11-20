@@ -27,7 +27,7 @@ describe('Vista AdminHome (datos de la API)', () => {
     expect(screen.getByRole('heading', { level: 1, name: '¡Hola, Admin!' })).toBeInTheDocument()
     expect(screen.getByText('Clientes: 2 · Vendedores: 1')).toBeInTheDocument()
     expect(useUsuarios).toHaveBeenCalled()
-    for (const acceso of ['Órdenes', 'Productos', 'Blogs', 'Categorías', 'Usuarios', 'Reportes', 'Perfil', 'Tienda']) {
+    for (const acceso of ['Órdenes', 'Productos', 'Imágenes', 'Blogs', 'Categorías', 'Usuarios', 'Reportes', 'Perfil', 'Tienda']) {
       expect(screen.getByRole('link', { name: new RegExp(`^${acceso}`) })).toBeInTheDocument()
     }
 

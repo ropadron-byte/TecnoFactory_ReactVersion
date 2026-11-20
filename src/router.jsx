@@ -169,7 +169,8 @@ const rutasAdmin = {
               lazy: pagina(() => import('./pages/admin/AdminDetalleProducto.jsx')),
             },
 
-            // Blogs: administrador y vendedor pueden gestionarlos (igual que la API)
+            // Catálogo de imágenes y blogs: administrador y vendedor pueden gestionarlos (igual que la API)
+            { path: 'imagenes', lazy: pagina(() => import('./pages/admin/AdminImagenes.jsx')) },
             { path: 'blogs', lazy: pagina(() => import('./pages/admin/AdminBlogs.jsx')) },
             { path: 'blogs/nuevo', lazy: pagina(() => import('./pages/admin/AdminNuevoBlog.jsx')) },
             {

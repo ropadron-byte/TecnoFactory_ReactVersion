@@ -39,6 +39,7 @@ export default function AdminLayout() {
               {enlace('/admin', '🏠', 'Inicio', true)}
               {enlace('/admin/ordenes', '🧾', 'Órdenes')}
               {enlace('/admin/productos', '📦', 'Productos')}
+              {enlace('/admin/imagenes', '🖼️', 'Imágenes')}
               {enlace('/admin/blogs', '📰', 'Blogs')}
               {/* Estas secciones son solo para el Administrador */}
               {esAdmin && (

@@ -126,7 +126,7 @@ describe('Conexión de blogs con la API', () => {
 
     expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes?size=1000')
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-de-prueba')
-    expect(imagenes).toEqual([IMAGEN])
+    expect(imagenes).toEqual([{ ...IMAGEN, duenos: [] }])
   })
 
   it('sube una imagen como FormData y gestiona la galería y la portada', async () => {
