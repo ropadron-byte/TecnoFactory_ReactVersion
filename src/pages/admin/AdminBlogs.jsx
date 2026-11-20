@@ -5,6 +5,7 @@ import EstadoForm from '../../components/EstadoForm.jsx'
 import { ApiError } from '../../services/api'
 import { activarBlog, desactivarBlog, eliminarBlog, listarBlogsGestion } from '../../services/blogsApi'
 import { formatearFecha } from '../../utils/formato'
+import { urlImagen } from '../../utils/imagenes'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminBlogs() {
@@ -97,7 +98,7 @@ export default function AdminBlogs() {
                     <td>
                       <div className="d-flex align-items-center gap-2">
                         {blog.imagenPrincipal?.url && (
-                          <img src={blog.imagenPrincipal.url} alt="" width="48" height="48" className="rounded object-fit-cover" />
+                          <img src={urlImagen(blog.imagenPrincipal.url)} alt="" width="48" height="48" className="rounded object-fit-cover" />
                         )}
                         <span>{blog.titulo}</span>
                       </div>

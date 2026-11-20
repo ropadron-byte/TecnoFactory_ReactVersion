@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Badge, Button } from 'react-bootstrap'
 import { ApiError } from '../services/api'
+import { urlImagen } from '../utils/imagenes'
 import {
   agregarImagenExistente,
   cambiarPortada,
@@ -46,7 +47,7 @@ export default function BlogGaleria({ blog, onActualizado }) {
             const esPortada = blog.imagenPrincipal?.id === imagen.id
             return (
               <div key={imagen.id} className="border rounded p-2" style={{ width: 180 }}>
-                <img src={imagen.url} alt={`Imagen ${imagen.id}`} className="img-fluid rounded mb-2" style={{ height: 110, objectFit: 'cover', width: '100%' }} />
+                <img src={urlImagen(imagen.url)} alt={`Imagen ${imagen.id}`} className="img-fluid rounded mb-2" style={{ height: 110, objectFit: 'cover', width: '100%' }} />
                 <div className="d-flex justify-content-between align-items-center gap-1 mb-2">
                   <small className="text-body-secondary">#{imagen.id}</small>
                   {esPortada && <Badge bg="warning" text="dark">Portada</Badge>}

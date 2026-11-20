@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blogs from '../pages/Blogs.jsx'
 import { vista } from './helpers.jsx'
+import { urlImagen } from '../utils/imagenes'
 
 vi.mock('../services/blogsApi.js', () => ({ listarBlogs: vi.fn() }))
 import { listarBlogs } from '../services/blogsApi'
@@ -12,7 +13,7 @@ const BLOGS_API = [
     id: 7,
     titulo: 'Abrimos la tienda online',
     fechaCreacion: '2026-08-12T10:00:00',
-    imagenPrincipal: { id: 1, url: 'http://localhost:8080/uploads/blog/portada.jpg' },
+    imagenPrincipal: { id: 1, url: '/uploads/blog/portada.jpg' },
   },
   {
     id: 8,
@@ -35,7 +36,7 @@ describe('Vista Blogs (desde la API)', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Novedades y curiosidades tecno' })).toBeInTheDocument()
     expect(await screen.findByRole('heading', { level: 3, name: 'Abrimos la tienda online' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 3, name: '5 datos curiosos sobre el SSD' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Abrimos la tienda online' })).toHaveAttribute('src', BLOGS_API[0].imagenPrincipal.url)
+    expect(screen.getByRole('img', { name: 'Abrimos la tienda online' })).toHaveAttribute('src', urlImagen(BLOGS_API[0].imagenPrincipal.url))
     expect(screen.getAllByRole('link', { name: 'Leer más' })).toHaveLength(2)
     expect(listarBlogs).toHaveBeenCalled()
 

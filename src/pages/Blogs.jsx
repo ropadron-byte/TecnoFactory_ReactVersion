@@ -4,6 +4,7 @@ import { Alert, Badge, Card, Col, Container, Row, Spinner } from 'react-bootstra
 import PageHead from '../components/PageHead.jsx'
 import { listarBlogs } from '../services/blogsApi'
 import { formatearFecha } from '../utils/formato'
+import { urlImagen } from '../utils/imagenes'
 import usePageTitle from '../hooks/usePageTitle'
 
 export default function Blogs() {
@@ -55,7 +56,7 @@ export default function Blogs() {
                   {blog.imagenPrincipal?.url ? (
                     <Card.Img
                       variant="top"
-                      src={blog.imagenPrincipal.url}
+                      src={urlImagen(blog.imagenPrincipal.url)}
                       alt={blog.titulo}
                       style={{ height: 180, objectFit: 'cover' }}
                     />

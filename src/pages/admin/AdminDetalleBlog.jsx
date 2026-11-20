@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import { formatearFecha } from '../../utils/formato'
+import { urlImagen } from '../../utils/imagenes'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminDetalleBlog() {
@@ -30,7 +31,7 @@ export default function AdminDetalleBlog() {
         </dl>
 
         {blog.imagenPrincipal?.url && (
-          <img src={blog.imagenPrincipal.url} alt={blog.titulo} className="img-fluid rounded my-3" style={{ maxHeight: 320, objectFit: 'cover' }} />
+          <img src={urlImagen(blog.imagenPrincipal.url)} alt={blog.titulo} className="img-fluid rounded my-3" style={{ maxHeight: 320, objectFit: 'cover' }} />
         )}
 
         <div style={{ whiteSpace: 'pre-line' }}>{blog.contenido}</div>
@@ -40,7 +41,7 @@ export default function AdminDetalleBlog() {
             <h2 className="h6 mt-4">Galería</h2>
             <div className="d-flex flex-wrap gap-2">
               {blog.imagenes.map((imagen) => (
-                <img key={imagen.id} src={imagen.url} alt={`Imagen ${imagen.id}`} className="rounded" width="120" height="90" style={{ objectFit: 'cover' }} />
+                <img key={imagen.id} src={urlImagen(imagen.url)} alt={`Imagen ${imagen.id}`} className="rounded" width="120" height="90" style={{ objectFit: 'cover' }} />
               ))}
             </div>
           </>

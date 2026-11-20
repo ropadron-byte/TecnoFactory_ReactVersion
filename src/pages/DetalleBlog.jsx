@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from 'react-router-dom'
 import PageHead from '../components/PageHead.jsx'
 import { formatearFecha } from '../utils/formato'
+import { urlImagen } from '../utils/imagenes'
 import usePageTitle from '../hooks/usePageTitle'
 
 function Contenido({ texto }) {
@@ -29,7 +30,7 @@ export default function DetalleBlog() {
 
       <article className="container py-4" style={{ maxWidth: 800 }}>
         {blog.imagenPrincipal?.url && (
-          <img src={blog.imagenPrincipal.url} alt={blog.titulo} className="img-fluid rounded mb-4 w-100" />
+          <img src={urlImagen(blog.imagenPrincipal.url)} alt={blog.titulo} className="img-fluid rounded mb-4 w-100" />
         )}
 
         <Contenido texto={blog.contenido} />
@@ -38,7 +39,7 @@ export default function DetalleBlog() {
           <div className="row g-3 my-4">
             {blog.imagenes.map((imagen) => (
               <div className="col-6 col-md-4" key={imagen.id}>
-                <img src={imagen.url} alt={`Imagen de ${blog.titulo}`} className="img-fluid rounded w-100" />
+                <img src={urlImagen(imagen.url)} alt={`Imagen de ${blog.titulo}`} className="img-fluid rounded w-100" />
               </div>
             ))}
           </div>

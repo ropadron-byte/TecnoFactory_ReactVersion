@@ -3,16 +3,17 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DetalleBlog from '../pages/DetalleBlog.jsx'
 import { vista } from './helpers.jsx'
+import { urlImagen } from '../utils/imagenes'
 
 const BLOG = {
   id: 7,
   titulo: '5 datos curiosos sobre el SSD',
   contenido: 'Primer párrafo del artículo.\n\nSegundo párrafo del artículo.',
   fechaCreacion: '2026-08-28T10:00:00',
-  imagenPrincipal: { id: 10, url: 'http://localhost:8080/uploads/blog/portada.jpg' },
+  imagenPrincipal: { id: 10, url: '/uploads/blog/portada.jpg' },
   imagenes: [
-    { id: 10, url: 'http://localhost:8080/uploads/blog/portada.jpg' },
-    { id: 11, url: 'http://localhost:8080/uploads/blog/detalle.jpg' },
+    { id: 10, url: '/uploads/blog/portada.jpg' },
+    { id: 11, url: '/uploads/blog/detalle.jpg' },
   ],
 }
 
@@ -23,10 +24,12 @@ describe('Vista DetalleBlog (datos de la API)', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: '5 datos curiosos sobre el SSD' })).toBeInTheDocument()
     expect(screen.getByText(/28 AGO 2026/)).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: '5 datos curiosos sobre el SSD' })).toHaveAttribute('src', BLOG.imagenPrincipal.url)
+    expect(screen.getByRole('img', { name: '5 datos curiosos sobre el SSD' })).toHaveAttribute('src', urlImagen(BLOG.imagenPrincipal.url))
     expect(screen.getByText('Primer párrafo del artículo.')).toBeInTheDocument()
     expect(screen.getByText('Segundo párrafo del artículo.')).toBeInTheDocument()
-    expect(screen.getAllByRole('img', { name: /Imagen de/ })).toHaveLength(2)
+    const galeria = screen.getAllByRole('img', { name: /Imagen de/ })
+    expect(galeria).toHaveLength(2)
+    expect(galeria[0]).toHaveAttribute('src', urlImagen(BLOG.imagenes[0].url))
 
     await user.click(screen.getByRole('link', { name: '← Volver al listado de blogs' }))
     expect(screen.getByText('Destino: /blogs')).toBeInTheDocument()
