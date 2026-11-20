@@ -80,22 +80,22 @@ export default function BlogGaleria({ blog, onActualizado }) {
           <label htmlFor="archivo-galeria" className="form-label fw-semibold">
             Subir imagen nueva
           </label>
-          <input
-            type="file"
-            id="archivo-galeria"
-            accept="image/*"
-            className="form-control"
-            onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-          />
-          <Button
-            className="mt-2"
-            size="sm"
-            variant="outline-primary"
-            disabled={ocupado || !archivo}
-            onClick={() => ejecutar(() => subirImagenBlog(blog.id, archivo), 'Imagen subida y agregada a la galería.')}
-          >
-            Subir y agregar
-          </Button>
+          <div className="input-group">
+            <input
+              type="file"
+              id="archivo-galeria"
+              accept="image/*"
+              className="form-control"
+              onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
+            />
+            <Button
+              variant="outline-primary"
+              disabled={ocupado || !archivo}
+              onClick={() => ejecutar(() => subirImagenBlog(blog.id, archivo), 'Imagen subida y agregada a la galería.')}
+            >
+              Subir y agregar
+            </Button>
+          </div>
         </div>
         <div className="col-md-6">
           <label htmlFor="id-imagen-existente" className="form-label fw-semibold">
