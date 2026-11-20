@@ -5,7 +5,7 @@ import { aCSV, descargarArchivo } from '../../utils/descarga'
 import { resumenVentas, usuariosPorTipo, ventasPorProducto } from '../../utils/reportes'
 import { TIPOS_USUARIO } from '../../data/constantes'
 import { obtenerOrdenes } from '../../services/ordenesService'
-import { obtenerUsuarios } from '../../services/usuariosService'
+import { useUsuarios } from '../../hooks/useUsuarios'
 import usePageTitle from '../../hooks/usePageTitle'
 import ListaDatos from '../../components/ListaDatos.jsx'
 
@@ -15,7 +15,7 @@ export default function AdminReportes() {
   const ordenes = obtenerOrdenes()
   const ventas = resumenVentas(ordenes)
   const masVendidos = ventasPorProducto(ordenes).slice(0, 8)
-  const porTipo = usuariosPorTipo(obtenerUsuarios())
+  const porTipo = usuariosPorTipo(useUsuarios())
 
   function descargar() {
     descargarArchivo(

@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminReportes from '../pages/admin/AdminReportes.jsx'
 import { CLIENTE, ENTREGA_RETIRO, entrarComoAdmin, vista } from './helpers.jsx'
 import { procesarCompra } from '../services/ordenesService'
+
+vi.mock('../services/usuariosApi.js', () => ({
+  listarUsuarios: vi.fn(),
+}))
+import { listarUsuarios } from '../services/usuariosApi'
 
 const createOriginal = URL.createObjectURL
 const revokeOriginal = URL.revokeObjectURL
@@ -12,8 +17,16 @@ afterEach(() => {
   URL.revokeObjectURL = revokeOriginal
 })
 
+beforeEach(() => {
+  vi.clearAllMocks()
+  listarUsuarios.mockResolvedValue([
+    { id: 1, tipo: 'Administrador' },
+    { id: 2, tipo: 'Vendedor' },
+  ])
+})
+
 describe('Vista AdminReportes', () => {
-  it('resume las ventas, los más vendidos y los usuarios por tipo, y descarga el CSV', async () => {
+  it('resume las ventas, los más vendidos y los usuarios por tipo desde la API', async () => {
     const user = userEvent.setup()
     let archivo = null
     URL.createObjectURL = (blob) => {
@@ -33,7 +46,8 @@ describe('Vista AdminReportes', () => {
     expect(screen.getAllByText('$1.044.990')).toHaveLength(2) // total vendido y ticket promedio
     expect(screen.getByText('1 u. · $1.044.990')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Usuarios por tipo' })).toBeInTheDocument()
-    expect(screen.getByText('Vendedor')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor')).toBeInTheDocument()
+    expect(listarUsuarios).toHaveBeenCalled()
 
     await user.click(screen.getByRole('button', { name: 'Descargar órdenes en CSV' }))
     const texto = await archivo.text()

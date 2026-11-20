@@ -2,19 +2,21 @@ import { useLoaderData, useNavigate } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import UsuarioForm from '../../components/UsuarioForm.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { actualizarUsuario } from '../../services/usuariosService'
+import { actualizarUsuario } from '../../services/usuariosApi'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminEditarUsuario() {
   const usuario = useLoaderData()
   usePageTitle('Editar usuario', 'Panel Tecno Factory')
   const navigate = useNavigate()
-  const { sesion, recargarSesion } = useAuth()
+  const { sesion, guardarSesion } = useAuth()
 
-  function guardar(datos) {
-    actualizarUsuario(usuario.id, datos)
-    // Si el administrador se edita a sí mismo, refrescamos su sesión.
-    if (sesion?.id === usuario.id) recargarSesion()
+  async function guardar(datos) {
+    const actualizado = await actualizarUsuario(usuario.id, datos)
+    // Si el administrador se edita a sí mismo, refrescamos la sesión con lo que devolvió la API.
+    if (sesion?.id === usuario.id) {
+      guardarSesion({ ...sesion, ...actualizado })
+    }
     setTimeout(() => navigate('/admin/usuarios'), 1200)
   }
 
@@ -22,7 +24,12 @@ export default function AdminEditarUsuario() {
     <>
       <AdminHeader titulo="Editar usuario" />
       <section>
-        <UsuarioForm key={usuario.id} usuario={usuario} onGuardar={guardar} mensajeExito="Usuario actualizado correctamente." />
+        <UsuarioForm
+          key={usuario.id}
+          usuario={usuario}
+          onGuardar={guardar}
+          mensajeExito="Usuario actualizado correctamente."
+        />
       </section>
     </>
   )

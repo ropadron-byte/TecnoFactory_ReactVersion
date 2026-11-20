@@ -6,7 +6,7 @@ import AdminRouteError from './components/AdminRouteError.jsx'
 import RequireRole from './components/RequireRole.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { obtenerProductoPorCodigo } from './services/productosService'
-import { obtenerUsuarioPorId } from './services/usuariosService'
+import { buscarUsuario } from './services/usuariosApi'
 import { obtenerCategoriaPorId, obtenerCategoriaPorSlug } from './services/categoriasService'
 import { obtenerOrdenPorId } from './services/ordenesService'
 import { BLOGS } from './data/blogs'
@@ -31,10 +31,12 @@ function loaderBlog({ params }) {
   return blog
 }
 
-function loaderUsuario({ params }) {
-  const usuario = obtenerUsuarioPorId(Number(params.id))
-  if (!usuario) throw noEncontrado('Usuario no encontrado')
-  return usuario
+async function loaderUsuario({ params }) {
+  try {
+    return await buscarUsuario(Number(params.id))
+  } catch {
+    throw noEncontrado('Usuario no encontrado')
+  }
 }
 
 function loaderCategoriaSlug({ params }) {

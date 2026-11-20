@@ -3,8 +3,15 @@ import { Link } from 'react-router-dom'
 import FormField from './FormField.jsx'
 import RegionComunaFields from './RegionComunaFields.jsx'
 import { TIPOS_USUARIO } from '../data/constantes'
-import { contrasenaValida, correoValido, validarRun } from '../utils/validaciones'
-import { correoYaRegistrado } from '../services/usuariosService'
+import { idComunaDe } from '../data/comunas'
+import { ApiError } from '../services/api'
+import {
+  contrasenaApiValida,
+  correoValido,
+  fechaNacimientoValida,
+  telefonoValido,
+  validarRun,
+} from '../utils/validaciones'
 import EstadoForm from './EstadoForm.jsx'
 
 function valoresIniciales(u) {
@@ -14,6 +21,7 @@ function valoresIniciales(u) {
     apellidos: u?.apellidos ?? '',
     correo: u?.correo ?? '',
     contrasena: '',
+    telefono: u?.telefono ?? '',
     fecha_nacimiento: u?.fecha_nacimiento ?? '',
     tipo: u?.tipo ?? '',
     region: u?.region ?? '',
@@ -32,24 +40,26 @@ export default function UsuarioForm({
   mensajeExito,
   cancelarA = '/admin/usuarios',
   modoPerfil = false, // el usuario edita sus propios datos: no puede cambiar su tipo ni su RUN
+  tipos = TIPOS_USUARIO,
 }) {
   const editando = Boolean(usuario)
   const [v, setV] = useState(() => valoresIniciales(usuario))
   const [enviado, setEnviado] = useState(false)
   const [estado, setEstado] = useState(null)
+  const [guardando, setGuardando] = useState(false)
 
-  const formatoCorreoOk = correoValido(v.correo)
-  const correoDuplicado = formatoCorreoOk && correoYaRegistrado(v.correo, usuario?.id)
   const validos = {
     run: validarRun(v.run.trim()),
     nombre: v.nombre.trim().length > 0 && v.nombre.trim().length <= 50,
     apellidos: v.apellidos.trim().length > 0 && v.apellidos.trim().length <= 100,
-    correo: formatoCorreoOk && !correoDuplicado,
+    correo: correoValido(v.correo),
     // Al editar, dejarla vacía es válido (se mantiene la actual).
-    contrasena: editando && v.contrasena.length === 0 ? true : contrasenaValida(v.contrasena),
+    contrasena: editando && v.contrasena.length === 0 ? true : contrasenaApiValida(v.contrasena),
+    telefono: telefonoValido(v.telefono),
+    fecha_nacimiento: fechaNacimientoValida(v.fecha_nacimiento),
     tipo: modoPerfil || v.tipo.length > 0,
     region: v.region.length > 0,
-    comuna: v.comuna.length > 0,
+    comuna: Boolean(idComunaDe(v.comuna)),
     direccion: v.direccion.trim().length > 0 && v.direccion.trim().length <= 300,
   }
   const marca = (campo) => {
@@ -64,34 +74,45 @@ export default function UsuarioForm({
     setV((prev) => ({ ...prev, [name]: value, ...(name === 'region' ? { comuna: '' } : {}) }))
   }
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault()
     setEnviado(true)
     setEstado(null)
 
     if (!Object.values(validos).every(Boolean)) {
-      setEstado({
-        tipo: 'error',
-        texto: correoDuplicado
-          ? `Ya existe ${editando ? 'otro ' : 'un '}usuario registrado con ese correo.`
-          : 'Revisa los campos marcados en rojo.',
-      })
+      setEstado({ tipo: 'error', texto: 'Revisa los campos marcados en rojo.' })
       return
     }
 
-    onGuardar({
-      run: v.run.trim(),
-      nombre: v.nombre.trim(),
-      apellidos: v.apellidos.trim(),
-      correo: v.correo.trim(),
-      contrasena: v.contrasena,
-      fecha_nacimiento: v.fecha_nacimiento,
-      tipo: modoPerfil ? usuario.tipo : v.tipo,
-      region: v.region,
-      comuna: v.comuna,
-      direccion: v.direccion.trim(),
-    })
-    setEstado({ tipo: 'success', texto: mensajeExito })
+    setGuardando(true)
+    try {
+      await onGuardar({
+        run: v.run.trim(),
+        nombre: v.nombre.trim(),
+        apellidos: v.apellidos.trim(),
+        correo: v.correo.trim(),
+        contrasena: v.contrasena,
+        telefono: v.telefono.trim(),
+        fecha_nacimiento: v.fecha_nacimiento,
+        tipo: modoPerfil ? usuario.tipo : v.tipo,
+        region: v.region,
+        comuna: v.comuna,
+        direccion: v.direccion.trim(),
+        activo: usuario?.activo ?? true,
+      })
+      setEstado({ tipo: 'success', texto: mensajeExito })
+    } catch (error) {
+      // El backend ya valida duplicados y devuelve un mensaje concreto (409).
+      const detalle = error instanceof ApiError && error.detalles
+        ? Object.values(error.detalles)[0]
+        : null
+      setEstado({
+        tipo: 'error',
+        texto: detalle || (error instanceof ApiError ? error.mensaje : 'No se pudo guardar el usuario.'),
+      })
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -127,24 +148,45 @@ export default function UsuarioForm({
         label={editando ? 'Nueva contraseña' : 'Contraseña'}
         hint={
           editando
-            ? 'Opcional. Déjala en blanco para mantener la contraseña actual. Si la cambias, entre 4 y 10 caracteres.'
-            : 'Entre 4 y 10 caracteres. El usuario la usará para iniciar sesión.'
+            ? 'Opcional. Déjala en blanco para mantener la contraseña actual. Si la cambias, entre 8 y 72 caracteres.'
+            : 'Entre 8 y 72 caracteres. El usuario la usará para iniciar sesión.'
         }
-        error="La contraseña debe tener entre 4 y 10 caracteres."
+        error="La contraseña debe tener entre 8 y 72 caracteres."
         estado={marca('contrasena')}
       >
-        <input type="password" id="contrasena" name="contrasena" maxLength={10} autoComplete="new-password" value={v.contrasena} onChange={cambiar} />
+        <input type="password" id="contrasena" name="contrasena" maxLength={72} autoComplete="new-password" value={v.contrasena} onChange={cambiar} />
       </FormField>
 
-      <FormField id="fecha_nacimiento" label="Fecha de nacimiento" hint="Opcional">
+      <FormField
+        id="telefono"
+        label="Teléfono"
+        hint="8 a 14 dígitos, con + opcional."
+        error="Ingresa un teléfono válido."
+        estado={marca('telefono')}
+      >
+        <input type="tel" id="telefono" name="telefono" maxLength={15} autoComplete="tel" value={v.telefono} onChange={cambiar} />
+      </FormField>
+
+      <FormField
+        id="fecha_nacimiento"
+        label="Fecha de nacimiento"
+        error="Ingresa una fecha anterior a hoy."
+        estado={marca('fecha_nacimiento')}
+      >
         <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value={v.fecha_nacimiento} onChange={cambiar} />
       </FormField>
 
       {!modoPerfil && (
-        <FormField id="tipo" label="Tipo de usuario" error="Selecciona un tipo de usuario." estado={marca('tipo')}>
-          <select id="tipo" name="tipo" value={v.tipo} onChange={cambiar}>
+        <FormField
+          id="tipo"
+          label="Tipo de usuario"
+          hint={editando ? 'El rol no se puede cambiar desde aquí.' : undefined}
+          error="Selecciona un tipo de usuario."
+          estado={marca('tipo')}
+        >
+          <select id="tipo" name="tipo" value={v.tipo} onChange={cambiar} disabled={editando}>
             <option value="">Selecciona un tipo</option>
-            {TIPOS_USUARIO.map((t) => (
+            {tipos.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
@@ -165,8 +207,8 @@ export default function UsuarioForm({
         <input type="text" id="direccion" name="direccion" maxLength={300} autoComplete="street-address" value={v.direccion} onChange={cambiar} />
       </FormField>
 
-      <button type="submit" className="btn btn-warning me-2">
-        {editando ? 'Guardar cambios' : 'Guardar usuario'}
+      <button type="submit" className="btn btn-warning me-2" disabled={guardando}>
+        {guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Guardar usuario'}
       </button>
       {editando && (
         <Link to={cancelarA} className="btn btn-outline-primary">

@@ -7,7 +7,7 @@ import { formatCLP } from '../../utils/formato'
 import { resumenInventario, resumenVentas, usuariosPorTipo } from '../../utils/reportes'
 import { obtenerProductos } from '../../services/productosService'
 import { obtenerOrdenes } from '../../services/ordenesService'
-import { obtenerUsuarios } from '../../services/usuariosService'
+import { useUsuarios } from '../../hooks/useUsuarios'
 import usePageTitle from '../../hooks/usePageTitle'
 
 // Accesos rápidos a cada sección del panel. `soloAdmin` los oculta al Vendedor.
@@ -43,7 +43,7 @@ export default function AdminHome() {
 
   const inventario = resumenInventario(obtenerProductos())
   const ventas = resumenVentas(obtenerOrdenes())
-  const usuarios = obtenerUsuarios()
+  const usuarios = useUsuarios()
   const porTipo = usuariosPorTipo(usuarios)
 
   return (
