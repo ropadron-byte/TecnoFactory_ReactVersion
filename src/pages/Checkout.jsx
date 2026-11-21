@@ -8,7 +8,8 @@ import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { formatCLP } from '../utils/formato'
 import { validarCheckout } from '../utils/validaciones'
-import { itemsDeCarrito, procesarCompra } from '../services/ordenesService'
+import { itemsDeCarrito } from '../services/ordenesService'
+import { comprar } from '../services/compraApi'
 import { obtenerUsuarioPorId } from '../services/usuariosService'
 import usePageTitle from '../hooks/usePageTitle'
 import EstadoForm from '../components/EstadoForm.jsx'
@@ -85,7 +86,7 @@ export default function Checkout() {
     setProcesando(true)
     await new Promise((resolver) => setTimeout(resolver, ESPERA_PAGO_MS))
 
-    const resultado = procesarCompra({
+    const resultado = await comprar({
       carrito: cart,
       usuarioId: sesion?.id ?? null,
       resultadoPago: simulacion,
