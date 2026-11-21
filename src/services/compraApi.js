@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from '../data/constantes'
-import { ApiError, eliminar, obtenerToken, post } from './api'
+import { ApiError, eliminar, post, tokenActual } from './api'
 import { sincronizarCatalogo } from './catalogoApi'
 import { completarConUsuario, itemsDeCarrito, obtenerOrdenes } from './ordenesService'
 import { imagenesProducto, obtenerProductoPorCodigo } from './productosService'
@@ -87,7 +87,7 @@ export async function comprar({ carrito, cliente: clienteForm, entrega: entregaF
     return { ok: true, orden: registrarPagoRechazado({ items, cliente, entrega, usuarioId }) }
   }
 
-  if (!obtenerToken()) return { ok: false, motivo: 'sesion', message: 'Debes iniciar sesión para pagar.' }
+  if (!tokenActual()) return { ok: false, motivo: 'sesion', message: 'Debes iniciar sesión para pagar.' }
 
   try {
     await eliminar('/carrito') // por si quedó algo de una compra anterior

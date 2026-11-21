@@ -10,6 +10,7 @@ import {
   patch,
   post,
   put,
+  tokenActual,
 } from '../services/api'
 
 // Respuesta falsa de fetch: solo lo que usa api.js (ok, status y text()).
@@ -73,6 +74,25 @@ describe('services/api', () => {
 
     await get('/productos', { autenticar: false })
     expect(ultimaLlamada().opciones.headers.Authorization).toBeUndefined()
+  })
+
+  it('usa el token de la sesión del login y lo prefiere al guardado aparte', async () => {
+    fetch.mockResolvedValue(respuesta(200, {}))
+    expect(tokenActual()).toBeNull()
+    guardarToken('guardado-aparte')
+    expect(tokenActual()).toBe('guardado-aparte')
+
+    localStorage.setItem('tf_sesion', JSON.stringify({ id: 2, token: 'jwt-de-la-sesion' }))
+    expect(tokenActual()).toBe('jwt-de-la-sesion')
+    await get('/carrito')
+    expect(ultimaLlamada().opciones.headers.Authorization).toBe('Bearer jwt-de-la-sesion')
+  })
+
+  it('ignora una sesión dañada o sin token', () => {
+    localStorage.setItem('tf_sesion', '{no es json')
+    expect(tokenActual()).toBeNull()
+    localStorage.setItem('tf_sesion', JSON.stringify({ id: 2 }))
+    expect(tokenActual()).toBeNull()
   })
 
   it('guarda y borra el token en localStorage', () => {

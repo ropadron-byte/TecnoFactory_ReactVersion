@@ -117,6 +117,17 @@ describe('services/compraApi', () => {
     expect(obtenerOrdenes()).toHaveLength(1)
   })
 
+  it('toma el token de la sesión del login para comprar', async () => {
+    localStorage.setItem('tf_sesion', JSON.stringify({ id: 2, token: 'jwt-de-la-sesion' }))
+    backendCon()
+
+    const resultado = await comprarTodo()
+
+    expect(resultado.ok).toBe(true)
+    const checkout = fetch.mock.calls.find(([url]) => url.endsWith('/boletas/checkout'))
+    expect(checkout[1].headers.Authorization).toBe('Bearer jwt-de-la-sesion')
+  })
+
   it('después de comprar actualiza el stock que ve la tienda', async () => {
     guardarToken('token-cliente')
     backendCon()
