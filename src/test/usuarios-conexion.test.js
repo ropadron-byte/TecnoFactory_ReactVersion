@@ -62,7 +62,7 @@ describe('Conexión de usuarios con la API', () => {
     const usuarios = await listarUsuarios()
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios?size=1000')
+    expect(url).toContain('/api/v1/usuarios?size=1000')
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(usuarios).toHaveLength(1)
     expect(usuarios[0]).toMatchObject({ id: 2, run: '190110222', tipo: 'Vendedor', comuna: 'Santiago', activo: true })
@@ -70,7 +70,7 @@ describe('Conexión de usuarios con la API', () => {
 
   it('busca un usuario por id', async () => {
     const usuario = await buscarUsuario(2)
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/usuarios/2')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/usuarios/2')
     expect(usuario.nombre).toBe('Vera')
   })
 
@@ -78,7 +78,7 @@ describe('Conexión de usuarios con la API', () => {
     await crearUsuario(DATOS_FORMULARIO)
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios/vendedores')
+    expect(url).toContain('/api/v1/usuarios/vendedores')
     expect(opciones.method).toBe('POST')
     const cuerpo = JSON.parse(opciones.body)
     expect(cuerpo).toMatchObject({ run: 19011022, runDv: '2', idComuna: expect.any(Number), clave: 'clave1234' })
@@ -87,7 +87,7 @@ describe('Conexión de usuarios con la API', () => {
 
   it('crea clientes en la ruta pública', async () => {
     await crearUsuario({ ...DATOS_FORMULARIO, tipo: 'Cliente' })
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/usuarios')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/usuarios')
     expect(fetchMock.mock.calls[0][0]).not.toContain('/vendedores')
   })
 
@@ -95,7 +95,7 @@ describe('Conexión de usuarios con la API', () => {
     await actualizarUsuario(2, { ...DATOS_FORMULARIO, contrasena: '', activo: false })
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios/2')
+    expect(url).toContain('/api/v1/usuarios/2')
     expect(opciones.method).toBe('PUT')
     const cuerpo = JSON.parse(opciones.body)
     expect(cuerpo.activo).toBe(false)
@@ -106,9 +106,9 @@ describe('Conexión de usuarios con la API', () => {
     await desactivarUsuario(2)
     await eliminarUsuario(2)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/usuarios/2/desactivar')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/usuarios/2/desactivar')
     expect(fetchMock.mock.calls[0][1].method).toBe('PATCH')
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/usuarios/2')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/usuarios/2')
     expect(fetchMock.mock.calls[1][1].method).toBe('DELETE')
   })
 })

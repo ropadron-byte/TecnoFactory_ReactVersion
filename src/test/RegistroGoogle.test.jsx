@@ -44,10 +44,10 @@ describe('Vista RegistroGoogle', () => {
 
   beforeEach(() => {
     fetchMock = vi.fn((url) => {
-      if (url.endsWith('/api/auth/google')) {
+      if (url.endsWith('/api/v1/auth/google')) {
         return Promise.resolve(respuesta(202, PENDIENTE))
       }
-      if (url.endsWith('/api/auth/google/completar')) {
+      if (url.endsWith('/api/v1/auth/google/completar')) {
         return Promise.resolve(
           respuesta(201, {
             token: 'jwt-google',
@@ -57,7 +57,7 @@ describe('Vista RegistroGoogle', () => {
           }),
         )
       }
-      if (url.endsWith('/api/usuarios/me')) {
+      if (url.endsWith('/api/v1/usuarios/me')) {
         return Promise.resolve(respuesta(200, USUARIO))
       }
       return Promise.resolve(respuesta(404, { mensaje: 'No encontrado' }))
@@ -94,10 +94,10 @@ describe('Vista RegistroGoogle', () => {
     expect(await screen.findByText('Perfil completado. Redirigiendo...')).toBeInTheDocument()
     expect(await screen.findByText('Destino: /')).toBeInTheDocument()
 
-    const llamada = fetchMock.mock.calls.find(([url]) => url.endsWith('/api/auth/google/completar'))
+    const llamada = fetchMock.mock.calls.find(([url]) => url.endsWith('/api/v1/auth/google/completar'))
     expect(llamada).toBeTruthy()
     const [url, opciones] = llamada
-    expect(url).toContain('/api/auth/google/completar')
+    expect(url).toContain('/api/v1/auth/google/completar')
     expect(JSON.parse(opciones.body)).toMatchObject({
       registroToken: 'token-de-registro',
       run: 19011022,
@@ -124,7 +124,7 @@ describe('Vista RegistroGoogle', () => {
   it('si el token temporal expiró, vuelve a mostrar el botón de Google', async () => {
     sessionStorage.setItem('tf_google_pendiente', JSON.stringify(PENDIENTE))
     fetchMock.mockImplementation((url) => {
-      if (url.endsWith('/api/auth/google/completar')) {
+      if (url.endsWith('/api/v1/auth/google/completar')) {
         return Promise.resolve(respuesta(401, { mensaje: 'Token de registro inválido o expirado' }))
       }
       return Promise.resolve(respuesta(404, { mensaje: 'No encontrado' }))

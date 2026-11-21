@@ -22,11 +22,11 @@ describe('Conexión HTTP con la API', () => {
   it('envía el JWT en el encabezado y parsea el JSON', async () => {
     fetchMock.mockResolvedValue(respuesta(200, { contenido: [] }))
 
-    const datos = await peticion('/api/usuarios?size=1000', { token: 'jwt-de-prueba' })
+    const datos = await peticion('/api/v1/usuarios?size=1000', { token: 'jwt-de-prueba' })
 
     expect(datos).toEqual({ contenido: [] })
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios?size=1000')
+    expect(url).toContain('/api/v1/usuarios?size=1000')
     expect(opciones.method).toBe('GET')
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(opciones.headers.Accept).toBe('application/json')
@@ -35,7 +35,7 @@ describe('Conexión HTTP con la API', () => {
   it('envía el cuerpo JSON con el método indicado', async () => {
     fetchMock.mockResolvedValue(respuesta(201, { id: 1 }))
 
-    await peticion('/api/blogs', { metodo: 'POST', cuerpo: { titulo: 'Hola' } })
+    await peticion('/api/v1/blogs', { metodo: 'POST', cuerpo: { titulo: 'Hola' } })
 
     const [, opciones] = fetchMock.mock.calls[0]
     expect(opciones.method).toBe('POST')
@@ -45,7 +45,7 @@ describe('Conexión HTTP con la API', () => {
 
   it('devuelve null para una respuesta 204', async () => {
     fetchMock.mockResolvedValue(respuesta(204))
-    expect(await peticion('/api/blogs/1', { metodo: 'DELETE' })).toBeNull()
+    expect(await peticion('/api/v1/blogs/1', { metodo: 'DELETE' })).toBeNull()
   })
 
   it('convierte un error de la API en ApiError con mensaje y detalles', async () => {
@@ -54,7 +54,7 @@ describe('Conexión HTTP con la API', () => {
       detalles: { correo: 'Ya existe' },
     }))
 
-    await expect(peticion('/api/usuarios', { metodo: 'POST', cuerpo: {} })).rejects.toMatchObject({
+    await expect(peticion('/api/v1/usuarios', { metodo: 'POST', cuerpo: {} })).rejects.toMatchObject({
       name: 'ApiError',
       status: 409,
       mensaje: 'El correo ya está registrado',
@@ -64,13 +64,13 @@ describe('Conexión HTTP con la API', () => {
 
   it('usa un mensaje por defecto cuando el backend no envía mensaje', async () => {
     fetchMock.mockResolvedValue(respuesta(403))
-    await expect(peticion('/api/blogs', { metodo: 'POST', cuerpo: {} })).rejects.toThrow('No tienes permisos para esta acción.')
+    await expect(peticion('/api/v1/blogs', { metodo: 'POST', cuerpo: {} })).rejects.toThrow('No tienes permisos para esta acción.')
   })
 
   it('informa de un error de red como ApiError con status 0', async () => {
     fetchMock.mockRejectedValue(new Error('sin conexión'))
-    await expect(peticion('/api/blogs')).rejects.toBeInstanceOf(ApiError)
-    await expect(peticion('/api/blogs')).rejects.toMatchObject({ status: 0 })
+    await expect(peticion('/api/v1/blogs')).rejects.toBeInstanceOf(ApiError)
+    await expect(peticion('/api/v1/blogs')).rejects.toMatchObject({ status: 0 })
   })
 
   it('sube archivos como FormData sin fijar Content-Type', async () => {
@@ -78,11 +78,11 @@ describe('Conexión HTTP con la API', () => {
     const formData = new FormData()
     formData.append('archivo', new Blob(['contenido']), 'imagen.jpg')
 
-    const imagen = await peticionFormData('/api/blogs/1/imagenes', { formData, token: 'jwt-de-prueba' })
+    const imagen = await peticionFormData('/api/v1/blogs/1/imagenes', { formData, token: 'jwt-de-prueba' })
 
     expect(imagen).toEqual({ id: 9, url: '/uploads/blog/imagen.jpg' })
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/blogs/1/imagenes')
+    expect(url).toContain('/api/v1/blogs/1/imagenes')
     expect(opciones.body).toBe(formData)
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(opciones.headers['Content-Type']).toBeUndefined()

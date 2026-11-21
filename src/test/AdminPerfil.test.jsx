@@ -38,7 +38,7 @@ describe('Vista AdminPerfil (sesión con JWT)', () => {
     vi.unstubAllGlobals()
   })
 
-  it('muestra los datos de la sesión API y guarda el perfil con PUT /api/usuarios/me', async () => {
+  it('muestra los datos de la sesión API y guarda el perfil con PUT /api/v1/usuarios/me', async () => {
     const user = userEvent.setup()
     entrarComoAdmin()
     render(vista(AdminPerfil, { ruta: '/admin/perfil' }))
@@ -56,7 +56,7 @@ describe('Vista AdminPerfil (sesión con JWT)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Perfil actualizado correctamente.')
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios/me')
+    expect(url).toContain('/api/v1/usuarios/me')
     expect(opciones.method).toBe('PUT')
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(obtenerSesion().nombre).toBe('Ana')

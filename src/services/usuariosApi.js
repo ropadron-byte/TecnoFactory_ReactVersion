@@ -66,20 +66,20 @@ function aApi(datos) {
   }
 }
 
-/** GET /api/usuarios (paginado). El panel pide suficientes elementos para mostrar la tabla completa. */
+/** GET /api/v1/usuarios (paginado). El panel pide suficientes elementos para mostrar la tabla completa. */
 export async function listarUsuarios() {
-  const respuesta = await peticion('/api/usuarios?size=1000', { token: token() })
+  const respuesta = await peticion('/api/v1/usuarios?size=1000', { token: token() })
   return (respuesta?.contenido ?? []).map(deApi)
 }
 
 export async function buscarUsuario(id) {
-  return deApi(await peticion(`/api/usuarios/${id}`, { token: token() }))
+  return deApi(await peticion(`/api/v1/usuarios/${id}`, { token: token() }))
 }
 
 /** Crea VENDEDOR o CLIENTE según el tipo elegido. No se pueden crear administradores. */
 export async function crearUsuario(datos) {
   const cuerpo = { ...aApi(datos), clave: datos.contrasena }
-  const ruta = datos.tipo === ROLES.vendedor ? '/api/usuarios/vendedores' : '/api/usuarios'
+  const ruta = datos.tipo === ROLES.vendedor ? '/api/v1/usuarios/vendedores' : '/api/v1/usuarios'
   return deApi(await peticion(ruta, { metodo: 'POST', cuerpo, token: token() }))
 }
 
@@ -90,15 +90,15 @@ export async function actualizarUsuario(id, datos) {
     activo: datos.activo ?? undefined,
     ...(datos.contrasena ? { clave: datos.contrasena } : {}),
   }
-  return deApi(await peticion(`/api/usuarios/${id}`, { metodo: 'PUT', cuerpo, token: token() }))
+  return deApi(await peticion(`/api/v1/usuarios/${id}`, { metodo: 'PUT', cuerpo, token: token() }))
 }
 
 export async function desactivarUsuario(id) {
-  return deApi(await peticion(`/api/usuarios/${id}/desactivar`, { metodo: 'PATCH', token: token() }))
+  return deApi(await peticion(`/api/v1/usuarios/${id}/desactivar`, { metodo: 'PATCH', token: token() }))
 }
 
 export async function eliminarUsuario(id) {
-  await peticion(`/api/usuarios/${id}`, { metodo: 'DELETE', token: token() })
+  await peticion(`/api/v1/usuarios/${id}`, { metodo: 'DELETE', token: token() })
 }
 
 export { ROLES_FRONT, rolFront }

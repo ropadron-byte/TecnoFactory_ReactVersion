@@ -50,7 +50,7 @@ describe('Conexión de imágenes con la API', () => {
     const imagenes = await listarImagenes()
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/imagenes?size=1000')
+    expect(url).toContain('/api/v1/imagenes?size=1000')
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(imagenes).toEqual([esperada])
   })
@@ -58,7 +58,7 @@ describe('Conexión de imágenes con la API', () => {
   it('busca una imagen por id', async () => {
     const imagen = await buscarImagen(10)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes/10')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/imagenes/10')
     expect(imagen).toEqual(esperada)
   })
 
@@ -69,7 +69,7 @@ describe('Conexión de imágenes con la API', () => {
     const imagen = await subirImagen(archivo)
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/imagenes')
+    expect(url).toContain('/api/v1/imagenes')
     expect(url).not.toContain('/productos')
     expect(opciones.method).toBe('POST')
     expect(opciones.body).toBeInstanceOf(FormData)
@@ -85,16 +85,16 @@ describe('Conexión de imágenes con la API', () => {
 
     await subirImagen(new File(['contenido'], 'producto.png'), 'productos')
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes/productos')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/imagenes/productos')
   })
 
-  it('reemplaza el archivo con PUT /api/imagenes/{id}', async () => {
+  it('reemplaza el archivo con PUT /api/v1/imagenes/{id}', async () => {
     const archivo = new File(['nuevo'], 'reemplazo.png')
 
     await reemplazarImagen(10, archivo)
 
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/imagenes/10')
+    expect(url).toContain('/api/v1/imagenes/10')
     expect(opciones.method).toBe('PUT')
     expect(opciones.body.get('archivo')).toBeInstanceOf(File)
     expect(opciones.body.get('archivo').name).toBe('reemplazo.png')
@@ -106,7 +106,7 @@ describe('Conexión de imágenes con la API', () => {
 
     await eliminarImagen(10)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes/10')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/imagenes/10')
     expect(fetchMock.mock.calls[0][1].method).toBe('DELETE')
   })
 
@@ -114,9 +114,9 @@ describe('Conexión de imágenes con la API', () => {
     await desacoplarImagenDeTodos(10)
     await desacoplarImagenDe(10, 'BLOG', 7)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes/10/duenos')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/imagenes/10/duenos')
     expect(fetchMock.mock.calls[0][1].method).toBe('DELETE')
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/imagenes/10/duenos/BLOG/7')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/imagenes/10/duenos/BLOG/7')
     expect(fetchMock.mock.calls[1][1].method).toBe('DELETE')
   })
 

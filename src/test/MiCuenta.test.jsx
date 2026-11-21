@@ -59,10 +59,10 @@ describe('Vista MiCuenta', () => {
   beforeEach(() => {
     guardarSesion(SESION)
     fetchMock = vi.fn((url, opciones) => {
-      if (url.endsWith('/api/usuarios/me') && opciones?.method === 'PUT') {
+      if (url.endsWith('/api/v1/usuarios/me') && opciones?.method === 'PUT') {
         return Promise.resolve(respuesta(200, USUARIO_ACTUALIZADO))
       }
-      if (url.endsWith('/api/auth/google/vincular')) {
+      if (url.endsWith('/api/v1/auth/google/vincular')) {
         return Promise.resolve(respuesta(204))
       }
       return Promise.resolve(respuesta(404, { mensaje: 'No encontrado' }))
@@ -102,7 +102,7 @@ describe('Vista MiCuenta', () => {
     expect(await screen.findByText('Perfil actualizado correctamente.')).toBeInTheDocument()
 
     const llamada = fetchMock.mock.calls.find(
-      ([url, opciones]) => url.endsWith('/api/usuarios/me') && opciones?.method === 'PUT',
+      ([url, opciones]) => url.endsWith('/api/v1/usuarios/me') && opciones?.method === 'PUT',
     )
     expect(llamada).toBeTruthy()
     const [, opciones] = llamada
@@ -128,10 +128,10 @@ describe('Vista MiCuenta', () => {
     await user.click(screen.getByRole('button', { name: 'Vincular Google' }))
     expect(await screen.findByText('Cuenta de Google vinculada correctamente.')).toBeInTheDocument()
 
-    const llamada = fetchMock.mock.calls.find(([url]) => url.endsWith('/api/auth/google/vincular'))
+    const llamada = fetchMock.mock.calls.find(([url]) => url.endsWith('/api/v1/auth/google/vincular'))
     expect(llamada).toBeTruthy()
     const [url, opciones] = llamada
-    expect(url).toContain('/api/auth/google/vincular')
+    expect(url).toContain('/api/v1/auth/google/vincular')
     expect(opciones.method).toBe('POST')
     expect(opciones.headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(JSON.parse(opciones.body)).toEqual({ credential: 'credential-de-prueba' })

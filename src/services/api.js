@@ -1,7 +1,7 @@
 // Cliente HTTP del backend (Spring Boot).
-// Compatible con dos formas de llamar:
-//  - peticion(ruta, { metodo, cuerpo, token, signal })      -> rutas /api/... ya completas
-//  - peticion(metodo, ruta, { cuerpo, params, autenticar }) -> rutas bajo /api/v1
+// Compatible con dos formas de llamar, ambas bajo el prefijo /api/v1 del backend:
+//  - peticion(ruta, { metodo, cuerpo, token, signal })      -> ruta /api/v1/... completa
+//  - peticion(metodo, ruta, { cuerpo, params, autenticar }) -> ruta relativa a /api/v1
 // La URL se configura con VITE_API_URL (por defecto, el backend local).
 
 export const API_URL = (import.meta.env?.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
@@ -107,7 +107,7 @@ export const put = (ruta, cuerpo, opciones) => peticionV1('PUT', ruta, { ...opci
 export const patch = (ruta, cuerpo, opciones) => peticionV1('PATCH', ruta, { ...opciones, cuerpo })
 export const eliminar = (ruta, opciones) => peticionV1('DELETE', ruta, opciones)
 
-// ---------- estilo directo (tus rutas /api/...) ----------
+// ---------- estilo directo (tus rutas /api/v1/...) ----------
 
 async function leerRespuesta(respuesta) {
   if (respuesta.status === 204) return null

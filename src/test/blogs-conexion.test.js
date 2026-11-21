@@ -53,7 +53,7 @@ describe('Conexión de blogs con la API', () => {
 
     const blogs = await listarBlogs()
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/blogs?size=1000')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/blogs?size=1000')
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(blogs).toEqual([{
       id: 7,
@@ -67,7 +67,7 @@ describe('Conexión de blogs con la API', () => {
     fetchMock.mockResolvedValueOnce(respuesta(200, PUBLICO))
     const blog = await buscarBlog(7)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/blogs/7')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/blogs/7')
     expect(blog).toMatchObject({ id: 7, contenido: 'Contenido del blog.' })
     expect(blog.imagenes).toEqual([IMAGEN])
     expect(blog.autorNombre).toBeUndefined()
@@ -81,9 +81,9 @@ describe('Conexión de blogs con la API', () => {
     const filas = await listarBlogsGestion()
     const detalle = await buscarBlogGestion(7)
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/blogs/gestion?size=1000')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/blogs/gestion?size=1000')
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-de-prueba')
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/blogs/gestion/7')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/blogs/gestion/7')
     expect(filas[0]).toMatchObject({ visible: true, autorNombre: 'Admin Tecno Factory' })
     expect(detalle).toMatchObject({ autorCorreo: 'ro.padron@duocuc.cl', visible: true })
   })
@@ -93,7 +93,7 @@ describe('Conexión de blogs con la API', () => {
     await actualizarBlog(7, { titulo: 'Editado', contenido: 'Texto nuevo', visible: true })
 
     const [urlCrear, opcionesCrear] = fetchMock.mock.calls[0]
-    expect(urlCrear).toContain('/api/blogs')
+    expect(urlCrear).toContain('/api/v1/blogs')
     expect(opcionesCrear.method).toBe('POST')
     expect(JSON.parse(opcionesCrear.body)).toEqual({
       titulo: 'Nuevo blog',
@@ -103,7 +103,7 @@ describe('Conexión de blogs con la API', () => {
     })
 
     const [urlEditar, opcionesEditar] = fetchMock.mock.calls[1]
-    expect(urlEditar).toContain('/api/blogs/7')
+    expect(urlEditar).toContain('/api/v1/blogs/7')
     expect(opcionesEditar.method).toBe('PUT')
     expect(JSON.parse(opcionesEditar.body)).toMatchObject({ titulo: 'Editado', visible: true })
   })
@@ -114,9 +114,9 @@ describe('Conexión de blogs con la API', () => {
     await eliminarBlog(7)
 
     expect(fetchMock.mock.calls.map(([, opciones]) => opciones.method)).toEqual(['PATCH', 'PATCH', 'DELETE'])
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/blogs/7/activar')
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/blogs/7/desactivar')
-    expect(fetchMock.mock.calls[2][0]).toContain('/api/blogs/7')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/blogs/7/activar')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/blogs/7/desactivar')
+    expect(fetchMock.mock.calls[2][0]).toContain('/api/v1/blogs/7')
   })
 
   it('lista el catálogo de imágenes para elegir una portada existente', async () => {
@@ -124,7 +124,7 @@ describe('Conexión de blogs con la API', () => {
 
     const imagenes = await listarImagenes()
 
-    expect(fetchMock.mock.calls[0][0]).toContain('/api/imagenes?size=1000')
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/imagenes?size=1000')
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-de-prueba')
     expect(imagenes).toEqual([{ ...IMAGEN, duenos: [] }])
   })
@@ -142,17 +142,17 @@ describe('Conexión de blogs con la API', () => {
     expect(quitada).toEqual(IMAGEN)
 
     const [urlSubida, opcionesSubida] = fetchMock.mock.calls[0]
-    expect(urlSubida).toContain('/api/blogs/7/imagenes')
+    expect(urlSubida).toContain('/api/v1/blogs/7/imagenes')
     expect(opcionesSubida.body).toBeInstanceOf(FormData)
     expect(opcionesSubida.body.get('archivo')).toBeInstanceOf(File)
     expect(opcionesSubida.body.get('archivo').name).toBe('imagen.jpg')
     expect(opcionesSubida.headers['Content-Type']).toBeUndefined()
 
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/blogs/7/imagenes/10')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/blogs/7/imagenes/10')
     expect(fetchMock.mock.calls[1][1].method).toBe('POST')
-    expect(fetchMock.mock.calls[2][0]).toContain('/api/blogs/7/imagen-principal/10')
+    expect(fetchMock.mock.calls[2][0]).toContain('/api/v1/blogs/7/imagen-principal/10')
     expect(fetchMock.mock.calls[2][1].method).toBe('PUT')
-    expect(fetchMock.mock.calls[3][0]).toContain('/api/blogs/7/imagenes/10')
+    expect(fetchMock.mock.calls[3][0]).toContain('/api/v1/blogs/7/imagenes/10')
     expect(fetchMock.mock.calls[3][1].method).toBe('DELETE')
   })
 })

@@ -36,7 +36,7 @@ describe('Vista IniciarSesion', () => {
 
   beforeEach(() => {
     fetchMock = vi.fn((url, opciones) => {
-      if (url.endsWith('/api/auth/login')) {
+      if (url.endsWith('/api/v1/auth/login')) {
         const cuerpo = JSON.parse(opciones.body)
         if (cuerpo.clave === 'admin1234') {
           return Promise.resolve(
@@ -50,7 +50,7 @@ describe('Vista IniciarSesion', () => {
         }
         return Promise.resolve(respuesta(401, { mensaje: 'Credenciales inválidas' }))
       }
-      if (url.endsWith('/api/usuarios/me')) {
+      if (url.endsWith('/api/v1/usuarios/me')) {
         return Promise.resolve(respuesta(200, USUARIO_API))
       }
       return Promise.resolve(respuesta(404, { mensaje: 'No encontrado' }))
@@ -91,7 +91,7 @@ describe('Vista IniciarSesion', () => {
       tipo: 'Administrador',
     })
     expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/login'),
+      expect.stringContaining('/api/v1/auth/login'),
       expect.objectContaining({ method: 'POST' }),
     )
   })
@@ -99,7 +99,7 @@ describe('Vista IniciarSesion', () => {
   it('redirige a completar el registro cuando la cuenta de Google es nueva (202)', async () => {
     const user = userEvent.setup()
     fetchMock.mockImplementation((url) => {
-      if (url.endsWith('/api/auth/google')) {
+      if (url.endsWith('/api/v1/auth/google')) {
         return Promise.resolve(
           respuesta(202, {
             requiereCompletarPerfil: true,
@@ -127,7 +127,7 @@ describe('Vista IniciarSesion', () => {
   it('inicia sesión directo cuando la cuenta de Google ya existe (200)', async () => {
     const user = userEvent.setup()
     fetchMock.mockImplementation((url) => {
-      if (url.endsWith('/api/auth/google')) {
+      if (url.endsWith('/api/v1/auth/google')) {
         return Promise.resolve(
           respuesta(200, {
             token: 'jwt-google',
@@ -137,7 +137,7 @@ describe('Vista IniciarSesion', () => {
           }),
         )
       }
-      if (url.endsWith('/api/usuarios/me')) {
+      if (url.endsWith('/api/v1/usuarios/me')) {
         return Promise.resolve(
           respuesta(200, {
             id: 9,

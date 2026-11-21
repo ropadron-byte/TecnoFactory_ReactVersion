@@ -24,7 +24,7 @@ describe('Vista RegistroUsuario', () => {
 
   beforeEach(() => {
     fetchMock = vi.fn((url) => {
-      if (url.endsWith('/api/usuarios')) {
+      if (url.endsWith('/api/v1/usuarios')) {
         return Promise.resolve(respuesta(201, { id: 2, correo: 'luisa@duocuc.cl' }))
       }
       return Promise.resolve(respuesta(404, { mensaje: 'No encontrado' }))
@@ -75,7 +75,7 @@ describe('Vista RegistroUsuario', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [url, opciones] = fetchMock.mock.calls[0]
-    expect(url).toContain('/api/usuarios')
+    expect(url).toContain('/api/v1/usuarios')
     expect(opciones.method).toBe('POST')
     expect(JSON.parse(opciones.body)).toMatchObject({
       run: 19011022,
@@ -118,7 +118,7 @@ describe('Vista RegistroUsuario', () => {
   it('ofrece registrarse con Google y redirige a completar los datos', async () => {
     const user = userEvent.setup()
     fetchMock.mockImplementation((url) => {
-      if (url.endsWith('/api/auth/google')) {
+      if (url.endsWith('/api/v1/auth/google')) {
         return Promise.resolve(
           respuesta(202, {
             requiereCompletarPerfil: true,
