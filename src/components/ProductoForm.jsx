@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import FormField from './FormField.jsx'
 import ImageUrlsField from './ImageUrlsField.jsx'
 import { validarProducto } from '../utils/validaciones'
-import { imagenesProducto, obtenerProductoPorCodigo } from '../services/productosService'
+import { imagenesProducto } from '../services/productosService'
 import { obtenerCategorias } from '../services/categoriasService'
 import EstadoForm from './EstadoForm.jsx'
 
@@ -33,10 +33,10 @@ export default function ProductoForm({ producto, onGuardar, mensajeExito, cancel
   const [v, setV] = useState(() => valoresIniciales(producto))
   const [enviado, setEnviado] = useState(false)
   const [estado, setEstado] = useState(null)
+  const [guardando, setGuardando] = useState(false)
   const [categorias] = useState(obtenerCategorias)
 
-  const codigoOcupado = !editando && v.codigo.trim().length >= 3 && Boolean(obtenerProductoPorCodigo(v.codigo.trim()))
-  const validos = validarProducto(v, { validarCodigo: !editando, codigoDisponible: !codigoOcupado })
+  const validos = validarProducto(v, { validarCodigo: false })
   const marca = (campo) => (enviado ? (validos[campo] ? 'valid' : 'invalid') : undefined)
 
   function cambiar(e) {
@@ -44,46 +44,48 @@ export default function ProductoForm({ producto, onGuardar, mensajeExito, cancel
     setV((prev) => ({ ...prev, [name]: value }))
   }
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault()
     setEnviado(true)
     setEstado(null)
 
     if (!Object.values(validos).every(Boolean)) {
-      setEstado({
-        tipo: 'error',
-        texto: codigoOcupado ? 'Ya existe un producto con ese código.' : 'Revisa los campos marcados en rojo.',
-      })
+      setEstado({ tipo: 'error', texto: 'Revisa los campos marcados en rojo.' })
       return
     }
 
     // Quitamos espacios, vacíos y duplicados de las URLs.
     const urls = [...new Set(v.urls.map((u) => u.trim()).filter(Boolean))]
-    onGuardar({
-      codigo: v.codigo.trim(),
+    const datos = {
       nombre: v.nombre.trim(),
       descripcion: v.descripcion.trim(),
-      precio: parseFloat(v.precio),
+      precio: Number(v.precio),
       stock: Number(v.stock),
       stockCritico: v.stockCritico === '' ? 0 : Number(v.stockCritico),
       categoria: v.categoria,
       descuento: v.descuento === '' ? 0 : Number(v.descuento),
       urls,
-    })
-    setEstado({ tipo: 'success', texto: mensajeExito })
+    }
+    if (editando) datos.codigo = v.codigo
+
+    setGuardando(true)
+    try {
+      await onGuardar(datos)
+      setEstado({ tipo: 'success', texto: mensajeExito })
+    } catch (error) {
+      setEstado({ tipo: 'error', texto: error.message || 'No se pudo guardar el producto.' })
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
     <form className="mx-auto" onSubmit={enviar} noValidate style={{ maxWidth: 720 }}>
-      <FormField
-        id="codigo"
-        label="Código producto"
-        hint={editando ? 'El código no se puede modificar.' : 'Mínimo 3 caracteres. Ej: TF-NB-002'}
-        error={!editando && (codigoOcupado ? 'Ya existe un producto con ese código.' : 'El código es obligatorio (mínimo 3 caracteres).')}
-        estado={editando ? undefined : marca('codigo')}
-      >
-        <input type="text" id="codigo" name="codigo" value={v.codigo} onChange={cambiar} readOnly={editando} />
-      </FormField>
+      {editando && (
+        <FormField id="codigo" label="Código producto" hint="Lo asigna el sistema y no se puede modificar.">
+          <input type="text" id="codigo" name="codigo" value={v.codigo} readOnly />
+        </FormField>
+      )}
 
       <FormField id="nombre" label="Nombre" error="El nombre es obligatorio (máx. 100 caracteres)." estado={marca('nombre')}>
         <input type="text" id="nombre" name="nombre" maxLength={100} value={v.nombre} onChange={cambiar} />
@@ -102,11 +104,11 @@ export default function ProductoForm({ producto, onGuardar, mensajeExito, cancel
       <FormField
         id="precio"
         label="Precio"
-        hint="Puede tener decimales. Mínimo 0 (se considera producto gratis)."
-        error="Ingresa un precio válido (0 o más)."
+        hint="En pesos, solo números enteros. Mínimo 0 (se considera producto gratis)."
+        error="Ingresa un precio válido (número entero, 0 o más)."
         estado={marca('precio')}
       >
-        <input type="number" id="precio" name="precio" min={0} step="0.01" value={v.precio} onChange={cambiar} />
+        <input type="number" id="precio" name="precio" min={0} step="1" value={v.precio} onChange={cambiar} />
       </FormField>
 
       <FormField
@@ -152,8 +154,8 @@ export default function ProductoForm({ producto, onGuardar, mensajeExito, cancel
 
       <ImageUrlsField value={v.urls} onChange={(urls) => setV((prev) => ({ ...prev, urls }))} />
 
-      <button type="submit" className="btn btn-warning me-2">
-        {editando ? 'Guardar cambios' : 'Guardar producto'}
+      <button type="submit" className="btn btn-warning me-2" disabled={guardando}>
+        {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Guardar producto'}
       </button>
       {editando && (
         <Link to={cancelarA} className="btn btn-outline-primary">

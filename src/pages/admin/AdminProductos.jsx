@@ -5,7 +5,8 @@ import ProductImage from '../../components/ProductImage.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLES } from '../../data/constantes'
 import PrecioProducto from '../../components/PrecioProducto.jsx'
-import { eliminarProducto, imagenesProducto, obtenerProductos } from '../../services/productosService'
+import { desactivarProducto } from '../../services/productosApi'
+import { imagenesProducto, obtenerProductos } from '../../services/productosService'
 import usePageTitle from '../../hooks/usePageTitle'
 
 function StockBadge({ producto }) {
@@ -19,11 +20,17 @@ export default function AdminProductos() {
   const { sesion } = useAuth()
   const esAdmin = sesion.tipo === ROLES.admin
   const [productos, setProductos] = useState(obtenerProductos)
+  const [error, setError] = useState(null)
 
-  function eliminar(p) {
-    if (!window.confirm(`¿Eliminar el producto "${p.nombre}"? Esta acción no se puede deshacer.`)) return
-    eliminarProducto(p.codigo)
-    setProductos(obtenerProductos())
+  async function eliminar(p) {
+    if (!window.confirm(`¿Eliminar el producto "${p.nombre}"? Dejará de mostrarse en la tienda.`)) return
+    setError(null)
+    try {
+      await desactivarProducto(p.codigo)
+      setProductos(obtenerProductos())
+    } catch (e) {
+      setError(e.message || 'No se pudo eliminar el producto.')
+    }
   }
 
   return (
@@ -47,6 +54,12 @@ export default function AdminProductos() {
             </Link>
           )}
         </p>
+
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="table-responsive">
           <table className="table table-hover align-middle bg-white">
