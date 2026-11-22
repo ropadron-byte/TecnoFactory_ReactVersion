@@ -110,7 +110,8 @@ export function validarCheckout(v) {
 export function validarCategoria(v, { nombreDisponible = true } = {}) {
   return {
     nombre: v.nombre.trim().length > 0 && v.nombre.trim().length <= 40 && nombreDisponible,
-    descripcion: v.descripcion.trim().length <= 200,
+    // Obligatoria: en la base de datos la descripción de la categoría no puede quedar vacía
+    descripcion: v.descripcion.trim().length > 0 && v.descripcion.trim().length <= 200,
     imagen: v.imagen.trim().length <= 500,
   }
 }
