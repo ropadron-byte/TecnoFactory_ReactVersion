@@ -1,5 +1,11 @@
 import { formatCLP } from './formato'
 
+function textoEntrega(entrega) {
+  if (entrega.tipo === 'retiro') return 'Entrega: Retiro en tienda'
+  if (entrega.tipo === 'no-registrada') return 'Entrega: sin datos registrados'
+  return `Entrega: ${entrega.calle}${entrega.departamento ? ', ' + entrega.departamento : ''}, ${entrega.comuna}, ${entrega.region}`
+}
+
 /** Texto plano de la boleta (para el cuerpo del correo). */
 export function textoBoleta(orden) {
   const lineas = [
@@ -7,14 +13,12 @@ export function textoBoleta(orden) {
     `Fecha: ${new Date(orden.fecha).toLocaleString('es-CL')}`,
     '',
     `Cliente: ${orden.cliente.nombre} ${orden.cliente.apellidos}`,
-    orden.entrega.tipo === 'retiro'
-      ? 'Entrega: Retiro en tienda'
-      : `Entrega: ${orden.entrega.calle}${orden.entrega.departamento ? ', ' + orden.entrega.departamento : ''}, ${orden.entrega.comuna}, ${orden.entrega.region}`,
+    textoEntrega(orden.entrega),
     '',
     'Detalle:',
     ...orden.items.map((i) => `- ${i.nombre} x${i.qty}: ${formatCLP(i.subtotal)}`),
     '',
-    `Total pagado: ${formatCLP(orden.total)}`,
+    `Total ${orden.estado === 'Anulada' ? 'anulado' : 'pagado'}: ${formatCLP(orden.total)}`,
     '',
     'Gracias por comprar en Tecno Factory.',
   ]

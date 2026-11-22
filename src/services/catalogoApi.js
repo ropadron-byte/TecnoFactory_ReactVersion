@@ -40,7 +40,7 @@ export function categoriaDesdeApi(c) {
 }
 
 /** Recorre todas las páginas de un listado paginado del backend y junta su contenido. */
-async function traerTodasLasPaginas(ruta, opciones) {
+export async function traerTodasLasPaginas(ruta, opciones) {
   const todos = []
   let pagina = 0
   let totalPaginas = 1

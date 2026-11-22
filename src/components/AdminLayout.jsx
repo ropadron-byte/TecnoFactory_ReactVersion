@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, ScrollRestoration, useNavigate } from 'react-router-dom'
 import { Nav, Offcanvas } from 'react-bootstrap'
 import { useAuth } from '../context/AuthContext.jsx'
 import { AdminUIContext } from '../context/AdminUIContext.jsx'
 import { ROLES } from '../data/constantes'
+import { sincronizarBoletas } from '../services/boletasApi'
 
 // Estructura del panel: barra lateral + contenido. En pantallas chicas la
 // barra lateral es un Offcanvas (se abre con el botón ☰).
@@ -11,7 +12,20 @@ export default function AdminLayout() {
   const { sesion, logout } = useAuth()
   const navigate = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [boletasCargadas, setBoletasCargadas] = useState(0)
   const esAdmin = sesion?.tipo === ROLES.admin
+
+  // Al entrar al panel se traen las boletas del backend. Cuando llegan, el contenido se
+  // vuelve a montar (key) para que Inicio, Órdenes y Reportes lean los datos nuevos.
+  useEffect(() => {
+    let activo = true
+    sincronizarBoletas().then(() => {
+      if (activo) setBoletasCargadas((n) => n + 1)
+    })
+    return () => {
+      activo = false
+    }
+  }, [])
 
   const cerrarMenu = () => setMenuAbierto(false)
 
@@ -74,7 +88,7 @@ export default function AdminLayout() {
 
         <main className="flex-grow-1 p-3 p-lg-4 d-flex flex-column" style={{ minWidth: 0 }}>
           <div className="flex-grow-1">
-            <Outlet />
+            <Outlet key={boletasCargadas} />
           </div>
           <footer className="border-top pt-3 mt-4 small text-body-secondary">© 2026 Tecno Factory — Panel de administración</footer>
         </main>

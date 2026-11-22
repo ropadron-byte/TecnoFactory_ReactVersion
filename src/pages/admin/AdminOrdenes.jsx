@@ -5,7 +5,8 @@ import TablaOrdenes from '../../components/TablaOrdenes.jsx'
 import { obtenerOrdenes } from '../../services/ordenesService'
 import usePageTitle from '../../hooks/usePageTitle'
 
-const FILTROS = ['Todas', 'Pagada', 'Fallida']
+const FILTROS = ['Todas', 'Pagada', 'Fallida', 'Anulada']
+const ETIQUETAS = { Todas: 'Todas', Pagada: 'Pagadas', Fallida: 'Con error de pago', Anulada: 'Anuladas' }
 
 // Listado de órdenes / boletas, de la más nueva a la más antigua.
 export default function AdminOrdenes() {
@@ -23,7 +24,7 @@ export default function AdminOrdenes() {
         <div className="d-flex flex-wrap gap-2 mb-3">
           {FILTROS.map((f) => (
             <button key={f} type="button" className={'btn btn-sm rounded-pill ' + (filtro === f ? 'btn-primary' : 'btn-outline-primary')} onClick={() => setFiltro(f)}>
-              {f === 'Todas' ? 'Todas' : f === 'Pagada' ? 'Pagadas' : 'Con error de pago'}
+              {ETIQUETAS[f]}
             </button>
           ))}
         </div>
