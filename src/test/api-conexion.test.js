@@ -68,7 +68,7 @@ describe('Conexión HTTP con la API', () => {
   })
 
   it('informa de un error de red como ApiError con status 0', async () => {
-    fetchMock.mockRejectedValue(new Error('sin conexión'))
+    fetchMock.mockRejectedValue(new Error('fallo de red'))
     await expect(peticion('/api/v1/blogs')).rejects.toBeInstanceOf(ApiError)
     await expect(peticion('/api/v1/blogs')).rejects.toMatchObject({ status: 0 })
   })

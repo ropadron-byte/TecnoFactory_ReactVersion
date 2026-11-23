@@ -75,6 +75,11 @@ export async function actualizarPerfil(datos, token) {
   return aSesion(usuario, token)
 }
 
+/** PATCH /api/v1/usuarios/me/desactivar -> baja lógica de la propia cuenta. */
+export function desactivarMiCuenta(token) {
+  return peticion('/api/v1/usuarios/me/desactivar', { metodo: 'PATCH', token })
+}
+
 /** POST /api/v1/auth/google/vincular -> vincula Google a la cuenta con sesión. */
 export async function vincularGoogle(credential, token) {
   return peticion('/api/v1/auth/google/vincular', {

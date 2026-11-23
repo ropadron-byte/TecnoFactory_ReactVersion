@@ -1,16 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLES } from '../../data/constantes'
 import { esStockCritico, obtenerProductos } from '../../services/productosService'
+import { listarProductosCriticos } from '../../services/productosApi'
 import usePageTitle from '../../hooks/usePageTitle'
 
 // Productos cuyo stock llegó al nivel crítico (o se agotó), del más urgente al menos.
 export default function AdminProductosCriticos() {
   usePageTitle('Productos críticos', 'Panel Tecno Factory')
   const { sesion } = useAuth()
-  const [criticos] = useState(() => obtenerProductos().filter(esStockCritico).sort((a, b) => a.stock - b.stock))
+  const [criticos, setCriticos] = useState(() => obtenerProductos().filter(esStockCritico).sort((a, b) => a.stock - b.stock))
+
+  useEffect(() => {
+    let activo = true
+    listarProductosCriticos()
+      .then((datos) => activo && setCriticos(datos.sort((a, b) => a.stock - b.stock)))
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [])
 
   return (
     <>

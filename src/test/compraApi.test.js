@@ -195,7 +195,7 @@ describe('services/compraApi', () => {
     expect(obtenerProductoPorCodigo('20').stock).toBe(40)
   })
 
-  it('avisa cuando no hay conexión con el servidor', async () => {
+  it('devuelve un error genérico cuando la solicitud no se completa', async () => {
     guardarToken('token-cliente')
     fetch.mockRejectedValue(new TypeError('Failed to fetch'))
 
@@ -203,7 +203,7 @@ describe('services/compraApi', () => {
 
     expect(resultado.ok).toBe(false)
     expect(resultado.motivo).toBe('api')
-    expect(resultado.message).toMatch(/backend esté encendido/)
+    expect(resultado.message).toBe('No se pudo completar la solicitud. Inténtalo de nuevo.')
   })
 
   it('una boleta anulada queda como orden "Anulada" y un producto desconocido no trae imagen', () => {

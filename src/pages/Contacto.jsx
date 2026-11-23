@@ -4,6 +4,7 @@ import FormField from '../components/FormField.jsx'
 import { correoValido } from '../utils/validaciones'
 import usePageTitle from '../hooks/usePageTitle'
 import EstadoForm from '../components/EstadoForm.jsx'
+import { enviarContacto } from '../services/contactosApi'
 
 const VACIO = { nombre: '', correo: '', comentario: '' }
 
@@ -19,6 +20,7 @@ export default function Contacto() {
   const [valores, setValores] = useState(VACIO)
   const [tocados, setTocados] = useState({}) // campos ya validados (al escribir o al enviar)
   const [estado, setEstado] = useState(null) // { tipo: 'success' | 'error', texto }
+  const [enviando, setEnviando] = useState(false)
 
   // El correo vacío no se marca ni como válido ni como inválido.
   function estadoCampo(campo) {
@@ -33,17 +35,30 @@ export default function Contacto() {
     setTocados((t) => ({ ...t, [name]: true }))
   }
 
-  function enviar(e) {
-    e.preventDefault() // todavía no hay backend
+  async function enviar(e) {
+    e.preventDefault()
     setTocados({ nombre: true, correo: true, comentario: true })
+    setEstado(null)
 
-    const ok = Object.keys(REGLAS).every((c) => REGLAS[c](valores[c]))
-    if (ok) {
+    if (!Object.keys(REGLAS).every((c) => REGLAS[c](valores[c]))) {
+      setEstado({ tipo: 'error', texto: 'Revisa los campos marcados en rojo antes de enviar el formulario.' })
+      return
+    }
+
+    setEnviando(true)
+    try {
+      await enviarContacto({
+        nombre: valores.nombre.trim(),
+        correo: valores.correo.trim(),
+        comentario: valores.comentario.trim(),
+      })
       setEstado({ tipo: 'success', texto: `¡Gracias, ${valores.nombre.trim()}! Tu mensaje fue enviado correctamente.` })
       setValores(VACIO)
       setTocados({})
-    } else {
-      setEstado({ tipo: 'error', texto: 'Revisa los campos marcados en rojo antes de enviar el formulario.' })
+    } catch (error) {
+      setEstado({ tipo: 'error', texto: error?.mensaje || 'Revisa los datos e inténtalo de nuevo.' })
+    } finally {
+      setEnviando(false)
     }
   }
 
@@ -95,8 +110,8 @@ export default function Contacto() {
             <textarea id="comentario" name="comentario" maxLength={500} value={valores.comentario} onChange={cambiar} />
           </FormField>
 
-          <button type="submit" className="btn btn-primary">
-            Enviar mensaje
+          <button type="submit" className="btn btn-primary" disabled={enviando}>
+            {enviando ? 'Enviando…' : 'Enviar mensaje'}
           </button>
 
           <EstadoForm estado={estado} />

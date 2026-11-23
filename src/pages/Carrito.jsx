@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Col, Container, Row } from 'react-bootstrap'
 import PageHead from '../components/PageHead.jsx'
@@ -12,7 +13,11 @@ import usePageTitle from '../hooks/usePageTitle'
 
 export default function Carrito() {
   usePageTitle('Mi carrito')
-  const { cart, totalPrice, updateCartQty, removeFromCart, clearCart } = useCart()
+  const { cart, totalPrice, updateCartQty, removeFromCart, clearCart, sincronizarCarrito } = useCart()
+
+  useEffect(() => {
+    sincronizarCarrito().catch(() => {})
+  }, [sincronizarCarrito])
 
   // Combinamos cada ítem del carrito con los datos actuales del producto.
   const lineas = cart

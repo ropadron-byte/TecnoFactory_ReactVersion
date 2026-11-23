@@ -71,6 +71,11 @@ export async function buscarBlog(id) {
   return dePublico(await peticion(`/api/v1/blogs/${id}`, { token: token() }))
 }
 
+/** GET /api/v1/blogs/{id}/imagen: portada del blog (204 si no tiene). */
+export async function imagenPrincipalBlog(id) {
+  return deImagen(await peticion(`/api/v1/blogs/${id}/imagen`, { token: token() }))
+}
+
 /** GET /api/v1/blogs/{id}/imagenes. */
 export async function listarImagenesBlog(id) {
   const imagenes = await peticion(`/api/v1/blogs/${id}/imagenes`, { token: token() })

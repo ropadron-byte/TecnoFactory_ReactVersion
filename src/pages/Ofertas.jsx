@@ -1,14 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PageHead from '../components/PageHead.jsx'
 import ProductGrid from '../components/ProductGrid.jsx'
 import { obtenerProductos } from '../services/productosService'
+import { listarOfertas } from '../services/productosApi'
 import { descuentoDe, tieneOferta } from '../utils/precios'
 import usePageTitle from '../hooks/usePageTitle'
 
-// Vista "Ofertas": todos los productos con descuento, del mayor al menor.
+// Vista "Ofertas": productos con descuento según GET /productos/ofertas.
 export default function Ofertas() {
   usePageTitle('Ofertas')
-  const [productos] = useState(obtenerProductos)
+  const [productos, setProductos] = useState(() => obtenerProductos().filter(tieneOferta))
+
+  useEffect(() => {
+    let activo = true
+    listarOfertas()
+      .then((datos) => activo && setProductos(datos))
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [])
+
   const ofertas = productos.filter(tieneOferta).sort((a, b) => descuentoDe(b) - descuentoDe(a))
 
   return (

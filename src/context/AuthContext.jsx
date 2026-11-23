@@ -54,6 +54,13 @@ export function AuthProvider({ children }) {
     return true
   }
 
+  /** Da de baja la propia cuenta (solo clientes) y cierra la sesión local. */
+  async function desactivarMiCuenta() {
+    if (!sesion?.token) throw new Error('No hay una sesión activa para desactivar la cuenta.')
+    await auth.desactivarMiCuenta(sesion.token)
+    logout()
+  }
+
   /** Vuelve a leer la sesión guardada (p. ej. tras editar al usuario actual). */
   function recargarSesion() {
     setSesion(usuarios.obtenerSesion())
@@ -72,6 +79,7 @@ export function AuthProvider({ children }) {
     recargarSesion,
     guardarSesion,
     actualizarPerfil,
+    desactivarMiCuenta,
     vincularGoogle,
     esStaff: sesion?.tipo === 'Administrador' || sesion?.tipo === 'Vendedor',
   }

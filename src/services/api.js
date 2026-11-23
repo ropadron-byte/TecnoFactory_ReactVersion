@@ -103,7 +103,7 @@ async function peticionV1(metodo, ruta, { cuerpo, params, autenticar = true } = 
       body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined,
     })
   } catch {
-    throw new ApiError(0, 'No se pudo conectar con el servidor. Revisa que el backend esté encendido.')
+    throw new ApiError(0, 'No se pudo completar la solicitud. Inténtalo de nuevo.')
   }
 
   const datos = await leerCuerpo(respuesta)
@@ -147,10 +147,7 @@ async function leerRespuesta(respuesta) {
 }
 
 function errorDeRed() {
-  return new ApiError(
-    0,
-    `No se pudo conectar con el servidor (${API_URL}). Verifica que el backend esté corriendo.`,
-  )
+  return new ApiError(0, 'No se pudo completar la solicitud. Inténtalo de nuevo.')
 }
 
 async function peticionDirecta(ruta, { metodo = 'GET', cuerpo, token, signal } = {}) {

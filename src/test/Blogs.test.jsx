@@ -44,10 +44,10 @@ describe('Vista Blogs (desde la API)', () => {
     expect(screen.getByText('Destino: /blogs/7')).toBeInTheDocument()
   })
 
-  it('muestra el error cuando la API no responde', async () => {
-    listarBlogs.mockRejectedValueOnce(new Error('No se pudo conectar con el servidor.'))
+  it('muestra el error cuando la carga no se completa', async () => {
+    listarBlogs.mockRejectedValueOnce(new Error('No se pudo completar la solicitud.'))
     render(vista(Blogs, { ruta: '/blogs' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo conectar con el servidor.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo completar la solicitud.')
   })
 })

@@ -66,6 +66,7 @@ describe('services/catalogoApi', () => {
         stock: 60,
         stockCritico: 7,
         descuento: 10,
+        activo: true,
         urls: ['https://cdn.test/iphone-6/1.webp', 'https://cdn.test/iphone-6/2.webp'],
       })
     })

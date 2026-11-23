@@ -1,12 +1,25 @@
+import { useEffect, useState } from 'react'
 import { Link, useLoaderData } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import { formatearFecha } from '../../utils/formato'
 import { urlImagen } from '../../utils/imagenes'
+import { imagenPrincipalBlog } from '../../services/blogsApi'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminDetalleBlog() {
   const blog = useLoaderData()
   usePageTitle(blog.titulo, 'Panel Tecno Factory')
+  const [portada, setPortada] = useState(blog.imagenPrincipal ?? null)
+
+  useEffect(() => {
+    let activo = true
+    imagenPrincipalBlog(blog.id)
+      .then((imagen) => activo && imagen && setPortada(imagen))
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [blog.id])
 
   return (
     <>
@@ -30,8 +43,8 @@ export default function AdminDetalleBlog() {
           </dd>
         </dl>
 
-        {blog.imagenPrincipal?.url && (
-          <img src={urlImagen(blog.imagenPrincipal.url)} alt={blog.titulo} className="img-fluid rounded my-3" style={{ maxHeight: 320, objectFit: 'cover' }} />
+        {portada?.url && (
+          <img src={urlImagen(portada.url)} alt={blog.titulo} className="img-fluid rounded my-3" style={{ maxHeight: 320, objectFit: 'cover' }} />
         )}
 
         <div style={{ whiteSpace: 'pre-line' }}>{blog.contenido}</div>

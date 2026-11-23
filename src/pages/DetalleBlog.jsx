@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Link, useLoaderData } from 'react-router-dom'
 import PageHead from '../components/PageHead.jsx'
 import { formatearFecha } from '../utils/formato'
 import { urlImagen } from '../utils/imagenes'
+import { imagenPrincipalBlog } from '../services/blogsApi'
 import usePageTitle from '../hooks/usePageTitle'
 
 function Contenido({ texto }) {
@@ -16,6 +18,17 @@ function Contenido({ texto }) {
 export default function DetalleBlog() {
   const blog = useLoaderData() // validado por el loader de la ruta
   usePageTitle(blog.titulo)
+  const [portada, setPortada] = useState(blog.imagenPrincipal ?? null)
+
+  useEffect(() => {
+    let activo = true
+    imagenPrincipalBlog(blog.id)
+      .then((imagen) => activo && imagen && setPortada(imagen))
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [blog.id])
 
   return (
     <>
@@ -29,8 +42,8 @@ export default function DetalleBlog() {
       />
 
       <article className="container py-4" style={{ maxWidth: 800 }}>
-        {blog.imagenPrincipal?.url && (
-          <img src={urlImagen(blog.imagenPrincipal.url)} alt={blog.titulo} className="img-fluid rounded mb-4 w-100" />
+        {portada?.url && (
+          <img src={urlImagen(portada.url)} alt={blog.titulo} className="img-fluid rounded mb-4 w-100" />
         )}
 
         <Contenido texto={blog.contenido} />

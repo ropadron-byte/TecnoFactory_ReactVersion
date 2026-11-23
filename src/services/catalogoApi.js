@@ -25,6 +25,7 @@ export function productoDesdeApi(p) {
     stock: p.stock,
     stockCritico: p.stockCritico,
     descuento: p.descuento ?? 0,
+    activo: p.activo !== false,
     urls: p.imagenes ?? [],
   }
 }
@@ -65,8 +66,7 @@ export async function sincronizarCatalogo() {
     localStorage.setItem(STORAGE_KEYS.categorias, JSON.stringify(categorias.map(categoriaDesdeApi)))
     localStorage.setItem(STORAGE_KEYS.productos, JSON.stringify(productos.map(productoDesdeApi)))
     return true
-  } catch (error) {
-    console.error('No se pudo sincronizar el catálogo con el backend:', error.message)
+  } catch {
     return false
   }
 }

@@ -1,4 +1,4 @@
-import { ApiError, eliminar, post, put } from './api'
+import { ApiError, eliminar, get, post, put } from './api'
 import { categoriaDesdeApi, sincronizarCatalogo } from './catalogoApi'
 
 // Gestión de categorías del panel de administración contra el backend.
@@ -21,6 +21,11 @@ export async function crearCategoria(datos) {
   const creada = await post('/categorias', aSolicitud(datos))
   await sincronizarCatalogo()
   return categoriaDesdeApi(creada)
+}
+
+/** GET /api/v1/categorias/{id}: detalle de una categoría. */
+export async function buscarCategoria(id) {
+  return categoriaDesdeApi(await get(`/categorias/${idDe(id)}`))
 }
 
 /** Si cambia el nombre, los productos de la categoría pasan a mostrarlo solos: se relee el catálogo. */
