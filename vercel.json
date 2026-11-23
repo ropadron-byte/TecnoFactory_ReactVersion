@@ -1,7 +1,7 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "http://TU_IP_PUBLICA:8080/api/:path*" },
-    { "source": "/uploads/:path*", "destination": "http://TU_IP_PUBLICA:8080/uploads/:path*" },
+    { "source": "/api/:path*", "destination": "http://186.64.113.33:8080/api/:path*" },
+    { "source": "/uploads/:path*", "destination": "http://186.64.113.33:8080/uploads/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
