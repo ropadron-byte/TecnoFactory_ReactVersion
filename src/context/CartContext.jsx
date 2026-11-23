@@ -1,5 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import * as carrito from '../services/carritoService'
+import { cambiarCantidad, obtenerCarrito, quitarItem } from '../services/carritoApi'
+import { tokenActual } from '../services/api'
 import { STORAGE_KEYS } from '../data/constantes'
 
 const CartContext = createContext(null)
@@ -16,7 +18,18 @@ export function CartProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
+  // GET /carrito: se llama al abrir la página del carrito con sesión iniciada.
+  const sincronizarCarrito = useCallback(async () => {
+    if (!tokenActual()) return
+    const items = await obtenerCarrito()
+    if (items.length > 0) {
+      carrito.saveCart(items)
+      setCart(items)
+    }
+  }, [])
+
   // Cada acción modifica localStorage y luego refresca el estado de React.
+  // Con JWT, el mismo cambio se refleja en el carrito del backend.
   function addToCart(codigo, qty) {
     const resultado = carrito.addToCart(codigo, qty)
     setCart(carrito.getCart())
@@ -25,10 +38,12 @@ export function CartProvider({ children }) {
   function removeFromCart(codigo) {
     carrito.removeFromCart(codigo)
     setCart(carrito.getCart())
+    if (tokenActual()) quitarItem(Number(codigo)).catch(() => {})
   }
   function updateCartQty(codigo, qty) {
     carrito.updateCartQty(codigo, qty)
     setCart(carrito.getCart())
+    if (tokenActual()) cambiarCantidad(Number(codigo), qty).catch(() => {})
   }
   function clearCart() {
     carrito.clearCart()
@@ -43,6 +58,7 @@ export function CartProvider({ children }) {
     removeFromCart,
     updateCartQty,
     clearCart,
+    sincronizarCarrito,
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

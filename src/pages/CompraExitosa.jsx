@@ -1,13 +1,37 @@
+import { useEffect, useState } from 'react'
 import { Link, useLoaderData } from 'react-router-dom'
 import PageHead from '../components/PageHead.jsx'
 import OrdenResumen from '../components/OrdenResumen.jsx'
 import BoletaAcciones from '../components/BoletaAcciones.jsx'
+import { buscarBoleta } from '../services/boletasApi'
+import { ordenDesdeBoleta } from '../services/compraApi'
 import usePageTitle from '../hooks/usePageTitle'
 
 // Pantalla "compra exitosa" con el resumen de la orden (el loader valida la orden).
 export default function CompraExitosa() {
-  const orden = useLoaderData()
+  const cargada = useLoaderData()
+  const [orden, setOrden] = useState(cargada)
   usePageTitle('Compra exitosa')
+
+  useEffect(() => {
+    let activo = true
+    buscarBoleta(cargada.id)
+      .then((boleta) => {
+        if (activo && boleta?.detalles) {
+          setOrden(
+            ordenDesdeBoleta(boleta, {
+              cliente: cargada.cliente,
+              entrega: cargada.entrega,
+              usuarioId: cargada.usuarioId,
+            }),
+          )
+        }
+      })
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [cargada])
 
   return (
     <>

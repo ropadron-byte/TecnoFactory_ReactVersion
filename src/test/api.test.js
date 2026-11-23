@@ -142,11 +142,11 @@ describe('services/api', () => {
     expect(obtenerToken()).toBe('vigente')
   })
 
-  it('avisa con status 0 cuando no hay conexión con el servidor', async () => {
+  it('entrega un ApiError con status 0 cuando la solicitud no se completa', async () => {
     fetch.mockRejectedValue(new TypeError('Failed to fetch'))
     const error = await get('/productos').catch((e) => e)
     expect(error).toBeInstanceOf(ApiError)
     expect(error.status).toBe(0)
-    expect(error.message).toMatch(/backend esté encendido/)
+    expect(error.message).toBe('No se pudo completar la solicitud. Inténtalo de nuevo.')
   })
 })

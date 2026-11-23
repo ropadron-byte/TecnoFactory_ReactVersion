@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import FormField from './FormField.jsx'
 import RegionComunaFields from './RegionComunaFields.jsx'
 import BotonGoogle from './BotonGoogle.jsx'
 import EstadoForm from './EstadoForm.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ApiError } from '../services/api'
+import { ROLES } from '../data/constantes'
 import { idComunaDe } from '../data/comunas'
 import { REGIONES } from '../data/regiones'
 import {
@@ -73,13 +74,16 @@ function DatosSoloLectura({ sesion }) {
 
 /** Datos de la cuenta autenticada: edición del perfil + vinculación con Google. */
 export default function DatosCuenta() {
-  const { sesion, actualizarPerfil, vincularGoogle } = useAuth()
+  const { sesion, actualizarPerfil, desactivarMiCuenta, vincularGoogle } = useAuth()
+  const navigate = useNavigate()
   const [v, setV] = useState(() => valoresIniciales(sesion))
   const [enviado, setEnviado] = useState(false)
   const [estadoPerfil, setEstadoPerfil] = useState(null)
   const [estadoGoogle, setEstadoGoogle] = useState(null)
+  const [estadoCuenta, setEstadoCuenta] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [vinculando, setVinculando] = useState(false)
+  const [desactivando, setDesactivando] = useState(false)
 
   if (!sesion) return null
 
@@ -162,6 +166,20 @@ export default function DatosCuenta() {
     }
   }
 
+  async function bajaCuenta() {
+    if (!window.confirm('¿Desactivar tu cuenta? Perderás el acceso y no podrás borrarla.')) return
+    setEstadoCuenta(null)
+    setDesactivando(true)
+    try {
+      await desactivarMiCuenta()
+      navigate('/')
+    } catch (error) {
+      setEstadoCuenta({ tipo: 'error', texto: error?.mensaje || 'Revisa los datos e inténtalo de nuevo.' })
+    } finally {
+      setDesactivando(false)
+    }
+  }
+
   return (
     <div style={{ maxWidth: 640 }}>
       <p className="text-body-secondary">
@@ -230,6 +248,19 @@ export default function DatosCuenta() {
           </p>
           {vinculando ? <p>Vinculando…</p> : <BotonGoogle onCredential={vincular} texto="signin_with" />}
           <EstadoForm estado={estadoGoogle} />
+        </section>
+      )}
+
+      {sesion.token && sesion.tipo === ROLES.cliente && (
+        <section className="border-top pt-3 mt-4">
+          <h2 className="h5">Desactivar mi cuenta</h2>
+          <p className="text-body-secondary">
+            Tus compras se conservan, pero no podrás volver a iniciar sesión.
+          </p>
+          <button type="button" className="btn btn-outline-danger btn-sm" onClick={bajaCuenta} disabled={desactivando}>
+            {desactivando ? 'Desactivando…' : 'Desactivar mi cuenta'}
+          </button>
+          <EstadoForm estado={estadoCuenta} />
         </section>
       )}
 

@@ -1,5 +1,5 @@
-import { ApiError, eliminar, post, put } from './api'
-import { productoDesdeApi, sincronizarCatalogo } from './catalogoApi'
+import { ApiError, eliminar, get, patch, post, put } from './api'
+import { productoDesdeApi, sincronizarCatalogo, traerTodasLasPaginas } from './catalogoApi'
 import { obtenerCategorias } from './categoriasService'
 
 // Gestión de productos del panel de administración contra el backend.
@@ -29,6 +29,36 @@ function aSolicitud(datos) {
     categoriaIds: [categoria.id],
     imagenes: datos.urls ?? [],
   }
+}
+
+/** GET /api/v1/productos/ofertas: catálogo de ofertas para la tienda. */
+export async function listarOfertas() {
+  const productos = await traerTodasLasPaginas('/productos/ofertas')
+  return productos.map(productoDesdeApi)
+}
+
+/** GET /api/v1/productos/admin: catálogo completo del panel, incluidos los desactivados. */
+export async function listarProductosAdmin() {
+  const productos = await traerTodasLasPaginas('/productos/admin')
+  return productos.map(productoDesdeApi)
+}
+
+/** GET /api/v1/productos/criticos: productos en umbral crítico (lista sin paginar). */
+export async function listarProductosCriticos() {
+  const productos = await get('/productos/criticos')
+  return (productos ?? []).map(productoDesdeApi)
+}
+
+/** GET /api/v1/productos/{id}: detalle de un producto. */
+export async function buscarProducto(id) {
+  return productoDesdeApi(await get(`/productos/${idDe(id)}`))
+}
+
+/** PATCH /api/v1/productos/{id}/activar: vuelve a publicar un producto desactivado. */
+export async function activarProducto(id) {
+  const activado = await patch(`/productos/${idDe(id)}/activar`)
+  await sincronizarCatalogo()
+  return productoDesdeApi(activado)
 }
 
 /** Crea un producto y devuelve el producto guardado (con el código que le dio el backend). */

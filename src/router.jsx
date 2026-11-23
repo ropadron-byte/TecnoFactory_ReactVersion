@@ -6,10 +6,13 @@ import AdminRouteError from './components/AdminRouteError.jsx'
 import RequireRole from './components/RequireRole.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { obtenerProductoPorCodigo } from './services/productosService'
+import { buscarProducto } from './services/productosApi'
 import { buscarUsuario } from './services/usuariosApi'
 import { obtenerCategoriaPorId, obtenerCategoriaPorSlug } from './services/categoriasService'
+import { buscarCategoria } from './services/categoriasApi'
 import { obtenerOrdenPorId } from './services/ordenesService'
 import { buscarBlog, buscarBlogGestion } from './services/blogsApi'
+import { buscarContacto } from './services/contactosApi'
 import { ROLES } from './data/constantes'
 
 // Carga diferida: cada página se descarga solo cuando se visita.
@@ -19,10 +22,14 @@ const pagina = (importador) => async () => ({ Component: (await importador()).de
 // errorElement correspondiente (así las páginas no tienen que validarlo).
 const noEncontrado = (mensaje) => new Response(mensaje, { status: 404 })
 
-function loaderProducto({ params }) {
-  const producto = obtenerProductoPorCodigo(params.codigo)
-  if (!producto) throw noEncontrado('Producto no encontrado')
-  return producto
+async function loaderProducto({ params }) {
+  const local = obtenerProductoPorCodigo(params.codigo)
+  try {
+    return await buscarProducto(params.codigo)
+  } catch {
+    if (!local) throw noEncontrado('Producto no encontrado')
+    return local
+  }
 }
 
 async function loaderBlog({ params }) {
@@ -49,16 +56,32 @@ async function loaderUsuario({ params }) {
   }
 }
 
-function loaderCategoriaSlug({ params }) {
-  const categoria = obtenerCategoriaPorSlug(params.slug)
-  if (!categoria) throw noEncontrado('Categoría no encontrada')
-  return categoria
+async function loaderContacto({ params }) {
+  try {
+    return await buscarContacto(params.id)
+  } catch {
+    throw noEncontrado('Mensaje no encontrado')
+  }
 }
 
-function loaderCategoriaId({ params }) {
-  const categoria = obtenerCategoriaPorId(Number(params.id))
-  if (!categoria) throw noEncontrado('Categoría no encontrada')
-  return categoria
+async function loaderCategoriaSlug({ params }) {
+  const local = obtenerCategoriaPorSlug(params.slug)
+  if (!local) throw noEncontrado('Categoría no encontrada')
+  try {
+    return await buscarCategoria(local.id)
+  } catch {
+    return local
+  }
+}
+
+async function loaderCategoriaId({ params }) {
+  const local = obtenerCategoriaPorId(Number(params.id))
+  if (!local) throw noEncontrado('Categoría no encontrada')
+  try {
+    return await buscarCategoria(local.id)
+  } catch {
+    return local
+  }
 }
 
 // La pantalla de compra exitosa / con error solo existe si la orden existe
@@ -203,6 +226,12 @@ const rutasAdmin = {
                   lazy: pagina(() => import('./pages/admin/AdminEditarCategoria.jsx')),
                 },
                 { path: 'reportes', lazy: pagina(() => import('./pages/admin/AdminReportes.jsx')) },
+                { path: 'contactos', lazy: pagina(() => import('./pages/admin/AdminContactos.jsx')) },
+                {
+                  path: 'contactos/:id',
+                  loader: loaderContacto,
+                  lazy: pagina(() => import('./pages/admin/AdminDetalleContacto.jsx')),
+                },
                 { path: 'usuarios', lazy: pagina(() => import('./pages/admin/AdminUsuarios.jsx')) },
                 { path: 'usuarios/nuevo', lazy: pagina(() => import('./pages/admin/AdminNuevoUsuario.jsx')) },
                 {

@@ -10,6 +10,8 @@ vi.mock('../services/productosApi.js', () => ({
   crearProducto: vi.fn(),
   editarProducto: vi.fn(),
   desactivarProducto: vi.fn(),
+  activarProducto: vi.fn(),
+  listarProductosAdmin: vi.fn(() => Promise.resolve(null)),
 }))
 import { desactivarProducto } from '../services/productosApi'
 

@@ -82,10 +82,28 @@ export async function sincronizarBoletas() {
     const todas = [...desdeBackend, ...rechazadas].sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
     localStorage.setItem(STORAGE_KEYS.ordenes, JSON.stringify(todas))
     return true
-  } catch (error) {
-    console.error('No se pudieron sincronizar las boletas con el backend:', error.message)
+  } catch {
     return false
   }
+}
+
+/** GET /api/v1/boletas/mias: compras del usuario con sesión, convertidas a órdenes de la tienda. */
+export async function listarMisBoletas() {
+  const boletas = await traerTodasLasPaginas('/boletas/mias')
+  const previas = obtenerOrdenes()
+  return boletas.map((boleta) => {
+    const local = previas.find((o) => o.id === boleta.id)
+    return ordenDesdeBoleta(boleta, {
+      cliente: local?.cliente ?? clienteDesconocido(boleta.idUsuario),
+      entrega: local?.entrega ?? ENTREGA_NO_REGISTRADA,
+      usuarioId: boleta.idUsuario,
+    })
+  })
+}
+
+/** GET /api/v1/boletas/{id}: detalle de una boleta. */
+export function buscarBoleta(id) {
+  return get(`/boletas/${id}`)
 }
 
 /** Anula una boleta (solo el Administrador): el backend devuelve el stock de sus productos.

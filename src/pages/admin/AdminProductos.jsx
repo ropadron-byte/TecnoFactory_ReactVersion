@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import ProductImage from '../../components/ProductImage.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLES } from '../../data/constantes'
 import PrecioProducto from '../../components/PrecioProducto.jsx'
-import { desactivarProducto } from '../../services/productosApi'
+import { activarProducto, desactivarProducto, listarProductosAdmin } from '../../services/productosApi'
 import { imagenesProducto, obtenerProductos } from '../../services/productosService'
 import usePageTitle from '../../hooks/usePageTitle'
 
@@ -21,6 +21,26 @@ export default function AdminProductos() {
   const esAdmin = sesion.tipo === ROLES.admin
   const [productos, setProductos] = useState(obtenerProductos)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let activo = true
+    listarProductosAdmin()
+      .then((datos) => activo && datos && setProductos(datos))
+      .catch(() => {})
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  async function activar(p) {
+    setError(null)
+    try {
+      await activarProducto(p.codigo)
+      setProductos(obtenerProductos())
+    } catch (e) {
+      setError(e.message || 'No se pudo activar el producto.')
+    }
+  }
 
   async function eliminar(p) {
     if (!window.confirm(`¿Eliminar el producto "${p.nombre}"? Dejará de mostrarse en la tienda.`)) return
@@ -106,9 +126,15 @@ export default function AdminProductos() {
                             <Link className="btn btn-outline-primary btn-sm" to={`/admin/productos/${encodeURIComponent(p.codigo)}/editar`}>
                               Editar
                             </Link>
-                            <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => eliminar(p)}>
-                              Eliminar
-                            </button>
+                            {p.activo === false ? (
+                              <button type="button" className="btn btn-outline-success btn-sm" onClick={() => activar(p)}>
+                                Activar
+                              </button>
+                            ) : (
+                              <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => eliminar(p)}>
+                                Eliminar
+                              </button>
+                            )}
                           </>
                         )}
                       </div>

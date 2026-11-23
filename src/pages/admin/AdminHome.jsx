@@ -19,6 +19,7 @@ const ACCESOS = [
   { to: '/admin/categorias', icono: '🏷️', titulo: 'Categorías', texto: 'Organiza los productos en categorías.', soloAdmin: true },
   { to: '/admin/usuarios', icono: '👤', titulo: 'Usuarios', texto: 'Cuentas de usuario y sus roles dentro del sistema.', soloAdmin: true },
   { to: '/admin/reportes', icono: '📊', titulo: 'Reportes', texto: 'Informes de ventas y de usuarios del sistema.', soloAdmin: true },
+  { to: '/admin/contactos', icono: '✉️', titulo: 'Contactos', texto: 'Mensajes enviados desde la tienda.', soloAdmin: true },
   { to: '/admin/perfil', icono: '🙍', titulo: 'Perfil', texto: 'Tus datos personales y tu contraseña.' },
   { to: '/', icono: '🏪', titulo: 'Tienda', texto: 'Visita la tienda tal como la ven tus clientes.' },
 ]
