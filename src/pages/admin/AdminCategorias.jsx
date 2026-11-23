@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import ProductImage from '../../components/ProductImage.jsx'
-import { contarProductosDeCategoria, eliminarCategoria, obtenerCategorias } from '../../services/categoriasService'
+import { borrarCategoria } from '../../services/categoriasApi'
+import { contarProductosDeCategoria, obtenerCategorias } from '../../services/categoriasService'
 import usePageTitle from '../../hooks/usePageTitle'
 import EstadoForm from '../../components/EstadoForm.jsx'
 
@@ -11,10 +12,14 @@ export default function AdminCategorias() {
   const [categorias, setCategorias] = useState(obtenerCategorias)
   const [aviso, setAviso] = useState(null)
 
-  function eliminar(c) {
+  async function eliminar(c) {
     if (!window.confirm(`¿Eliminar la categoría "${c.nombre}"? Esta acción no se puede deshacer.`)) return
-    const resultado = eliminarCategoria(c.id)
-    setAviso({ tipo: resultado.ok ? 'success' : 'error', texto: resultado.message })
+    try {
+      await borrarCategoria(c.id)
+      setAviso({ tipo: 'success', texto: 'Categoría eliminada.' })
+    } catch (error) {
+      setAviso({ tipo: 'error', texto: error.message || 'No se pudo eliminar la categoría.' })
+    }
     setCategorias(obtenerCategorias())
   }
 

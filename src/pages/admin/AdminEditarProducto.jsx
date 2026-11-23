@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import ProductoForm from '../../components/ProductoForm.jsx'
-import { actualizarProducto } from '../../services/productosService'
+import { editarProducto } from '../../services/productosApi'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminEditarProducto() {
@@ -9,8 +9,8 @@ export default function AdminEditarProducto() {
   usePageTitle('Editar producto', 'Panel Tecno Factory')
   const navigate = useNavigate()
 
-  function guardar({ codigo: _codigo, ...cambios }) {
-    actualizarProducto(producto.codigo, cambios) // el código no se modifica
+  async function guardar({ codigo: _codigo, ...cambios }) {
+    await editarProducto(producto.codigo, cambios) // el código no se modifica
     setTimeout(() => navigate('/admin/productos'), 1200)
   }
 

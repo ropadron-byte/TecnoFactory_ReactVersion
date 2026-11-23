@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate } from 'react-router-dom'
 import AdminHeader from '../../components/AdminHeader.jsx'
 import CategoriaForm from '../../components/CategoriaForm.jsx'
-import { actualizarCategoria } from '../../services/categoriasService'
+import { editarCategoria } from '../../services/categoriasApi'
 import usePageTitle from '../../hooks/usePageTitle'
 
 export default function AdminEditarCategoria() {
@@ -9,8 +9,8 @@ export default function AdminEditarCategoria() {
   usePageTitle('Editar categoría', 'Panel Tecno Factory')
   const navigate = useNavigate()
 
-  function guardar(datos) {
-    actualizarCategoria(categoria.id, datos)
+  async function guardar(datos) {
+    await editarCategoria(categoria.id, datos)
     setTimeout(() => navigate('/admin/categorias'), 1200)
   }
 

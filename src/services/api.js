@@ -4,6 +4,8 @@
 //  - peticion(metodo, ruta, { cuerpo, params, autenticar }) -> ruta relativa a /api/v1
 // La URL se configura con VITE_API_URL (por defecto, el backend local).
 
+import { STORAGE_KEYS } from '../data/constantes'
+
 export const API_URL = (import.meta.env?.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
 export const API_V1 = `${API_URL}/api/v1`
 
@@ -23,6 +25,17 @@ export const CLAVE_TOKEN = 'tf_token'
 export const obtenerToken = () => localStorage.getItem(CLAVE_TOKEN)
 export const guardarToken = (token) => localStorage.setItem(CLAVE_TOKEN, token)
 export const borrarToken = () => localStorage.removeItem(CLAVE_TOKEN)
+
+// El login guarda el JWT dentro de la sesión (tf_sesion). Las rutas del estilo /api/v1
+// (catálogo, carrito, boletas) usan ese token; si no hay sesión, el guardado aparte.
+function tokenDeSesion() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.sesion))?.token ?? null
+  } catch {
+    return null
+  }
+}
+export const tokenActual = () => tokenDeSesion() ?? obtenerToken()
 
 // Mensajes para el estilo directo (tus servicios de blogs/usuarios/imágenes/auth).
 const MENSAJES = {
@@ -78,7 +91,7 @@ async function leerCuerpo(respuesta) {
 
 async function peticionV1(metodo, ruta, { cuerpo, params, autenticar = true } = {}) {
   const headers = { Accept: 'application/json' }
-  const token = autenticar ? obtenerToken() : null
+  const token = autenticar ? tokenActual() : null
   if (token) headers.Authorization = `Bearer ${token}`
   if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
 

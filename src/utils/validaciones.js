@@ -72,7 +72,8 @@ export function validarProducto(v, { codigoDisponible = true, validarCodigo = tr
   const resultado = {
     nombre: v.nombre.trim().length > 0 && v.nombre.trim().length <= 100,
     descripcion: v.descripcion.trim().length <= 500,
-    precio: !vacio(v.precio) && !Number.isNaN(precio) && precio >= 0,
+    // Pesos enteros: el backend guarda el precio como número entero
+    precio: !vacio(v.precio) && Number.isInteger(precio) && precio >= 0,
     stock: !vacio(v.stock) && Number.isInteger(stock) && stock >= 0,
     stockCritico: vacio(v.stockCritico) || (Number.isInteger(critico) && critico >= 0),
     categoria: v.categoria.length > 0,
@@ -109,7 +110,8 @@ export function validarCheckout(v) {
 export function validarCategoria(v, { nombreDisponible = true } = {}) {
   return {
     nombre: v.nombre.trim().length > 0 && v.nombre.trim().length <= 40 && nombreDisponible,
-    descripcion: v.descripcion.trim().length <= 200,
+    // Obligatoria: en la base de datos la descripción de la categoría no puede quedar vacía
+    descripcion: v.descripcion.trim().length > 0 && v.descripcion.trim().length <= 200,
     imagen: v.imagen.trim().length <= 500,
   }
 }

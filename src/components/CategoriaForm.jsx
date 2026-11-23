@@ -15,6 +15,7 @@ export default function CategoriaForm({ categoria, onGuardar, mensajeExito, canc
   })
   const [enviado, setEnviado] = useState(false)
   const [estado, setEstado] = useState(null)
+  const [guardando, setGuardando] = useState(false)
 
   const ocupado = v.nombre.trim().length > 0 && nombreCategoriaOcupado(v.nombre, categoria?.id)
   const validos = validarCategoria(v, { nombreDisponible: !ocupado })
@@ -25,7 +26,7 @@ export default function CategoriaForm({ categoria, onGuardar, mensajeExito, canc
     setV((prev) => ({ ...prev, [name]: value }))
   }
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault()
     setEnviado(true)
     setEstado(null)
@@ -34,8 +35,16 @@ export default function CategoriaForm({ categoria, onGuardar, mensajeExito, canc
       setEstado({ tipo: 'error', texto: ocupado ? 'Ya existe una categoría con ese nombre.' : 'Revisa los campos marcados en rojo.' })
       return
     }
-    onGuardar({ nombre: v.nombre.trim(), descripcion: v.descripcion.trim(), imagen: v.imagen.trim() })
-    setEstado({ tipo: 'success', texto: mensajeExito })
+
+    setGuardando(true)
+    try {
+      await onGuardar({ nombre: v.nombre.trim(), descripcion: v.descripcion.trim(), imagen: v.imagen.trim() })
+      setEstado({ tipo: 'success', texto: mensajeExito })
+    } catch (error) {
+      setEstado({ tipo: 'error', texto: error.message || 'No se pudo guardar la categoría.' })
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -50,7 +59,7 @@ export default function CategoriaForm({ categoria, onGuardar, mensajeExito, canc
         <input type="text" id="nombre" name="nombre" maxLength={40} value={v.nombre} onChange={cambiar} />
       </FormField>
 
-      <FormField id="descripcion" label="Descripción" hint="Opcional. Máximo 200 caracteres." error="Máximo 200 caracteres." estado={marca('descripcion')}>
+      <FormField id="descripcion" label="Descripción" hint="Obligatoria. Máximo 200 caracteres." error="La descripción es obligatoria (máx. 200 caracteres)." estado={marca('descripcion')}>
         <textarea id="descripcion" name="descripcion" maxLength={200} value={v.descripcion} onChange={cambiar} />
       </FormField>
 
@@ -58,8 +67,8 @@ export default function CategoriaForm({ categoria, onGuardar, mensajeExito, canc
         <input type="text" id="imagen" name="imagen" placeholder="https://..." value={v.imagen} onChange={cambiar} />
       </FormField>
 
-      <button type="submit" className="btn btn-warning me-2">
-        {editando ? 'Guardar cambios' : 'Guardar categoría'}
+      <button type="submit" className="btn btn-warning me-2" disabled={guardando}>
+        {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Guardar categoría'}
       </button>
       <Link to={cancelarA} className="btn btn-outline-primary">
         Cancelar
